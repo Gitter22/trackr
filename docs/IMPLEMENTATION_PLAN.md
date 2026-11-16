@@ -9,8 +9,8 @@
   - [x] A3 GraphQL SDL in `apps/api/src/graphql/schema/`
   - [x] A4 RBAC policy `apps/api/src/policy/policy.ts` (+ tests)
 - [x] **Phase B** — Technical design doc (`docs/TECHNICAL_DESIGN.md`) — approved
-- [x] **Phase C** — Critical analysis (`docs/CRITICAL_ANALYSIS.md`) — _waiting for review_
-- [ ] **Phase D** — Build (D1–D14)
+- [x] **Phase C** — Critical analysis (`docs/CRITICAL_ANALYSIS.md`) — approved; the 3 recommended schema changes were skipped
+- [x] **Phase D** — Build (D1–D14) — done; see docs/E2E_REPORT.md
   - [x] D1 Monorepo tooling: workspaces, eslint/prettier, husky + lint-staged, Zod env config
   - [x] D2 Docker compose, Nginx, Postgres, Redis
   - [x] D3 Control plane auth and admin routes
@@ -24,7 +24,7 @@
   - [x] D11 Tenant app: users, projects, statuses
   - [x] D12 Kanban board, filters, chart, task drawer
   - [x] D13 Browser end-to-end check
-  - [ ] D14 README, CLAUDE.md, clean Docker run
+  - [x] D14 README, CLAUDE.md, clean Docker run
 
 ## Context
 
