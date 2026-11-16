@@ -7,8 +7,8 @@
     - Review fix: soft deletes on Task, Label, Comment record `deletedAt` + `deletedById`; Project records `archivedById`. Deletes also go to `TaskActivity`.
   - [x] A3 GraphQL SDL in `apps/api/src/graphql/schema/`
   - [x] A4 RBAC policy `apps/api/src/policy/policy.ts` (+ tests)
-- [x] **Phase B** — Technical design doc (`docs/TECHNICAL_DESIGN.md`) — *waiting for review*
-- [ ] **Phase C** — Critical analysis
+- [x] **Phase B** — Technical design doc (`docs/TECHNICAL_DESIGN.md`) — approved
+- [x] **Phase C** — Critical analysis (`docs/CRITICAL_ANALYSIS.md`) — *waiting for review*
 - [ ] **Phase D** — Build (D1–D14)
 
 ## Context
