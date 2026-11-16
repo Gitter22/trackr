@@ -1,13 +1,13 @@
 # Trcker — Implementation Plan
 
 ## Progress
-- [x] **Phase A** — Schema design (Prisma control + tenant, GraphQL SDL, RBAC policy) — *waiting for review*
+- [x] **Phase A** — Schema design (Prisma control + tenant, GraphQL SDL, RBAC policy) — approved
   - [x] A1 `prisma/control.prisma`
   - [x] A2 `prisma/tenant.prisma`
     - Review fix: soft deletes on Task, Label, Comment record `deletedAt` + `deletedById`; Project records `archivedById`. Deletes also go to `TaskActivity`.
   - [x] A3 GraphQL SDL in `apps/api/src/graphql/schema/`
   - [x] A4 RBAC policy `apps/api/src/policy/policy.ts` (+ tests)
-- [ ] **Phase B** — Technical design doc
+- [x] **Phase B** — Technical design doc (`docs/TECHNICAL_DESIGN.md`) — *waiting for review*
 - [ ] **Phase C** — Critical analysis
 - [ ] **Phase D** — Build (D1–D14)
 
