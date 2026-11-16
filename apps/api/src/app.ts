@@ -4,6 +4,7 @@ import { errorHandler } from './lib/http';
 import { requireAdmin, requireAdminHost } from './middleware/admin-auth';
 import { requireProxySecret } from './middleware/proxy-secret';
 import { adminAuthRouter } from './rest/admin/auth.routes';
+import { adminOrgsRouter } from './rest/admin/orgs.routes';
 import { adminUsersRouter } from './rest/admin/users.routes';
 
 export function createApp(): express.Express {
@@ -28,6 +29,7 @@ export function createApp(): express.Express {
   admin.use(requireAdminHost);
   admin.use('/auth', adminAuthRouter);
   admin.use('/users', requireAdmin, adminUsersRouter);
+  admin.use('/organizations', requireAdmin, adminOrgsRouter);
   app.use('/api/admin', admin);
 
   app.use('/api', (_req, res) => {
