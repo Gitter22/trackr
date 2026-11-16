@@ -9,18 +9,48 @@
     "apps/*"
   ],
   "scripts": {
+    "dev": "concurrently -n api,web -c magenta,cyan \"npm run dev -w apps/api\" \"npm run dev -w apps/web --if-present\"",
+    "build": "npm run build --workspaces --if-present",
+    "start": "npm run start -w apps/api",
+    "typecheck": "npm run typecheck --workspaces --if-present",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "test": "npm run test --workspaces --if-present",
     "db:generate": "prisma generate --schema prisma/control.prisma && prisma generate --schema prisma/tenant.prisma",
-    "validate:prisma": "prisma validate --schema prisma/control.prisma && prisma validate --schema prisma/tenant.prisma",
+    "db:migrate:control": "dotenv -e .env.local -- prisma migrate deploy --schema prisma/control.prisma",
+    "db:migrate:dev:control": "dotenv -e .env.local -- prisma migrate dev --schema prisma/control.prisma",
+    "db:migrate:tenants": "npm run migrate:tenants -w apps/api",
+    "validate:prisma": "dotenv -e .env.example -- sh -c 'prisma validate --schema prisma/control.prisma && prisma validate --schema prisma/tenant.prisma'",
     "validate:graphql": "npm run validate:graphql -w apps/api",
     "validate:schemas": "npm run validate:prisma && npm run validate:graphql",
-    "typecheck": "npm run typecheck --workspaces --if-present",
-    "test": "npm run test --workspaces --if-present"
+    "services:up": "docker compose --env-file .env.local up -d postgres redis",
+    "docker:up": "docker compose --env-file .env.local up -d --build",
+    "docker:down": "docker compose --env-file .env.local down",
+    "docker:logs": "docker compose --env-file .env.local logs -f",
+    "prepare": "husky"
   },
   "devDependencies": {
-    "prisma": "6.19.3"
+    "@eslint/js": "9.39.5",
+    "concurrently": "10.0.7",
+    "dotenv-cli": "11.1.0",
+    "eslint": "9.39.5",
+    "eslint-config-prettier": "10.1.8",
+    "globals": "17.14.0",
+    "husky": "9.1.7",
+    "lint-staged": "17.6.1",
+    "prettier": "3.10.1",
+    "prisma": "6.19.3",
+    "typescript-eslint": "8.72.2"
   },
-  "dependencies": {
-    "@prisma/client": "^6.19.3"
+  "lint-staged": {
+    "*.{ts,tsx,js,mjs,cjs}": [
+      "eslint --fix",
+      "prettier --write"
+    ],
+    "*.{json,md,graphql,css,yml,yaml}": "prettier --write",
+    "*.prisma": "prisma format --schema"
   },
   "allowScripts": {
     "esbuild@0.28.2": true,

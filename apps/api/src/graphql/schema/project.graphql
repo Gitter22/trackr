@@ -4,15 +4,21 @@ type Project {
   description: String
   shortCode: String!
   archivedAt: DateTime
-  """Who archived it; null when active."""
+  """
+  Who archived it; null when active.
+  """
   archivedBy: User
   createdAt: DateTime!
   createdBy: User!
   members: [User!]!
-  """Ordered by position."""
+  """
+  Ordered by position.
+  """
   statuses: [TaskStatus!]!
   labels: [Label!]!
-  """Total live (non-deleted) tasks."""
+  """
+  Total live (non-deleted) tasks.
+  """
   taskCount: Int!
 }
 
@@ -54,7 +60,9 @@ input CreateStatusInput {
   name: String!
   category: StatusCategory!
   color: String
-  """Place after this status; omit to append at the end."""
+  """
+  Place after this status; omit to append at the end.
+  """
   afterStatusId: ID
 }
 
@@ -66,7 +74,9 @@ input UpdateStatusInput {
 
 input MoveStatusInput {
   id: ID!
-  """Neighbours after the move; null means start/end of the list."""
+  """
+  Neighbours after the move; null means start/end of the list.
+  """
   beforeStatusId: ID
   afterStatusId: ID
 }
@@ -78,7 +88,9 @@ input LabelInput {
 }
 
 extend type Query {
-  """Owner sees all; others see only projects they are members of."""
+  """
+  Owner sees all; others see only projects they are members of.
+  """
   projects(includeArchived: Boolean = false): [Project!]!
   project(id: ID!): Project
 }
@@ -94,7 +106,9 @@ extend type Mutation {
   createStatus(input: CreateStatusInput!): TaskStatus!
   updateStatus(id: ID!, input: UpdateStatusInput!): TaskStatus!
   moveStatus(input: MoveStatusInput!): TaskStatus!
-  """Tasks in the deleted status move to moveTasksToStatusId."""
+  """
+  Tasks in the deleted status move to moveTasksToStatusId.
+  """
   deleteStatus(id: ID!, moveTasksToStatusId: ID!): Boolean!
 
   createLabel(input: LabelInput!): Label!

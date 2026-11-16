@@ -6,7 +6,9 @@ enum Priority {
 
 type Task {
   id: ID!
-  """e.g. KIK-12"""
+  """
+  e.g. KIK-12
+  """
   key: String!
   number: Int!
   title: String!
@@ -15,7 +17,9 @@ type Task {
   status: TaskStatus!
   rank: Float!
   dueDate: Date
-  """Derived: dueDate before today (org timezone) and status not COMPLETED/CANCELLED."""
+  """
+  Derived: dueDate before today (org timezone) and status not COMPLETED/CANCELLED.
+  """
   isOverdue: Boolean!
   completedAt: DateTime
   createdAt: DateTime!
@@ -25,9 +29,13 @@ type Task {
   assignees: [User!]!
   labels: [Label!]!
   commentCount: Int!
-  """Top-level comments, oldest first; each carries its replies."""
+  """
+  Top-level comments, oldest first; each carries its replies.
+  """
   comments: [Comment!]!
-  """Newest first."""
+  """
+  Newest first.
+  """
   activity: [TaskActivity!]!
 }
 
@@ -39,7 +47,9 @@ type TaskEdge {
 type TaskConnection {
   edges: [TaskEdge!]!
   pageInfo: PageInfo!
-  """Total matching the filter (not just this page)."""
+  """
+  Total matching the filter (not just this page).
+  """
   totalCount: Int!
 }
 
@@ -55,7 +65,9 @@ input TaskFilter {
   labelIds: [ID!]
   due: DateRange
   overdue: Boolean
-  """Matches title or key."""
+  """
+  Matches title or key.
+  """
   search: String
 }
 
@@ -64,7 +76,9 @@ input CreateTaskInput {
   title: String!
   description: String
   priority: Priority = MEDIUM
-  """Defaults to the first status (lowest position)."""
+  """
+  Defaults to the first status (lowest position).
+  """
   statusId: ID
   dueDate: Date
   assigneeIds: [ID!]
@@ -80,13 +94,19 @@ input UpdateTaskInput {
   labelIds: [ID!]
 }
 
-"""Drag and drop: new column and the neighbours the task lands between."""
+"""
+Drag and drop: new column and the neighbours the task lands between.
+"""
 input MoveTaskInput {
   id: ID!
   statusId: ID!
-  """Task directly above after the drop (null = top of column)."""
+  """
+  Task directly above after the drop (null = top of column).
+  """
   afterTaskId: ID
-  """Task directly below after the drop (null = bottom of column)."""
+  """
+  Task directly below after the drop (null = bottom of column).
+  """
   beforeTaskId: ID
 }
 
@@ -101,7 +121,9 @@ type CategoryCount {
 }
 
 type AssigneeCount {
-  """Null bucket = unassigned."""
+  """
+  Null bucket = unassigned.
+  """
   user: User
   count: Int!
   overdue: Int!
@@ -116,12 +138,18 @@ type ProjectSummary {
 }
 
 extend type Query {
-  """Relay pagination ordered by (rank, id). Use filter.statusIds=[x] to page one board column."""
+  """
+  Relay pagination ordered by (rank, id). Use filter.statusIds=[x] to page one board column.
+  """
   tasks(projectId: ID!, filter: TaskFilter, first: Int = 50, after: String): TaskConnection!
   task(id: ID!): Task
-  """Counts honour the same filter as the board (minus statusIds)."""
+  """
+  Counts honour the same filter as the board (minus statusIds).
+  """
   projectSummary(projectId: ID!, filter: TaskFilter): ProjectSummary!
-  """Tasks assigned to the viewer across every project they can see."""
+  """
+  Tasks assigned to the viewer across every project they can see.
+  """
   myTasks(filter: TaskFilter, first: Int = 50, after: String): TaskConnection!
 }
 

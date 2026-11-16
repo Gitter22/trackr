@@ -58,7 +58,14 @@ const ADMIN: RoleRules = {
   projectMember: { view: 'member', add: 'member', remove: 'member' },
   taskStatus: { view: 'member', create: 'member', edit: 'member', reorder: 'member', delete: 'member' },
   label: { view: 'member', create: 'member', delete: 'member' },
-  task: { view: 'member', create: 'member', edit: 'member', move: 'member', assign: 'member', delete: 'member' },
+  task: {
+    view: 'member',
+    create: 'member',
+    edit: 'member',
+    move: 'member',
+    assign: 'member',
+    delete: 'member',
+  },
   comment: { view: 'member', create: 'member', edit: 'memberAndAuthor', delete: 'member' },
 };
 
@@ -110,7 +117,12 @@ export interface Actor {
   isActive: boolean;
 }
 
-export function can<R extends Resource>(actor: Actor, resource: R, action: Action<R>, target: PolicyTarget = {}): boolean {
+export function can<R extends Resource>(
+  actor: Actor,
+  resource: R,
+  action: Action<R>,
+  target: PolicyTarget = {},
+): boolean {
   if (!actor.isActive) return false;
   if (target.projectArchived && PROJECT_SCOPED.has(resource) && !READ_ACTIONS.has(action)) return false;
   const rule = (POLICY[actor.role][resource] as Record<string, Rule>)[action];
@@ -124,6 +136,11 @@ export class ForbiddenError extends Error {
   }
 }
 
-export function assertCan<R extends Resource>(actor: Actor, resource: R, action: Action<R>, target?: PolicyTarget): void {
+export function assertCan<R extends Resource>(
+  actor: Actor,
+  resource: R,
+  action: Action<R>,
+  target?: PolicyTarget,
+): void {
   if (!can(actor, resource, action, target)) throw new ForbiddenError(resource, String(action));
 }

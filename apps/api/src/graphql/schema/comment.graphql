@@ -1,17 +1,25 @@
 type Comment {
   id: ID!
-  """Empty string when deleted."""
+  """
+  Empty string when deleted.
+  """
   body: String!
   author: User!
-  """Deleted comments still appear if they have replies, shown as deleted."""
+  """
+  Deleted comments still appear if they have replies, shown as deleted.
+  """
   isDeleted: Boolean!
   deletedAt: DateTime
   deletedBy: User
   createdAt: DateTime!
   editedAt: DateTime
-  """Null for top-level comments."""
+  """
+  Null for top-level comments.
+  """
   parentId: ID
-  """Always empty on replies (one level only)."""
+  """
+  Always empty on replies (one level only).
+  """
   replies: [Comment!]!
 }
 
@@ -42,7 +50,9 @@ type TaskActivity {
 input AddCommentInput {
   taskId: ID!
   body: String!
-  """Set to reply; must be a top-level comment."""
+  """
+  Set to reply; must be a top-level comment.
+  """
   parentId: ID
 }
 
