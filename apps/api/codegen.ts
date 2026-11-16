@@ -19,6 +19,7 @@ const config: CodegenConfig = {
           Task: '../../generated/tenant#Task as TaskModel',
           Comment: '../../generated/tenant#Comment as CommentModel',
           TaskActivity: '../../generated/tenant#TaskActivity as TaskActivityModel',
+          TaskConnection: '../models#TaskConnectionModel',
         },
       },
     },

@@ -4,6 +4,9 @@ import { DateScalar, DateTimeScalar, JSONScalar } from '../scalars';
 import { labelResolvers } from './label';
 import { projectResolvers } from './project';
 import { statusResolvers } from './status';
+import { commentResolvers } from './comment';
+import { taskResolvers } from './task';
+import { taskMutationResolvers } from './task-mutations';
 
 const baseResolvers: Resolvers = {
   DateTime: DateTimeScalar,
@@ -19,4 +22,7 @@ export const resolvers: Resolvers = mergeResolvers([
   projectResolvers,
   statusResolvers,
   labelResolvers,
+  taskResolvers,
+  taskMutationResolvers,
+  commentResolvers,
 ]);

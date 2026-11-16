@@ -18,7 +18,7 @@
   - [x] D5 Tenant middlewares (resolver, rate limit, Prisma pool, auth)
   - [x] D6 Tenant REST auth and users
   - [x] D7 GraphQL Yoga, loaders, projects and statuses
-  - [ ] D8 Tasks, move, pagination, comments, activity, summary
+  - [x] D8 Tasks, move, pagination, comments, activity, summary
   - [ ] D9 Web foundations
   - [ ] D10 Marketing, admin panel, 404
   - [ ] D11 Tenant app: users, projects, statuses

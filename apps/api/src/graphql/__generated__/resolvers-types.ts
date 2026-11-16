@@ -1,13 +1,6 @@
 import { GraphQLResolveInfo, GraphQLScalarType, GraphQLScalarTypeConfig } from 'graphql';
-import {
-  User as UserModel,
-  Project as ProjectModel,
-  TaskStatus as TaskStatusModel,
-  Label as LabelModel,
-  Task as TaskModel,
-  Comment as CommentModel,
-  TaskActivity as TaskActivityModel,
-} from '../../generated/tenant';
+import { User as UserModel, Project as ProjectModel, TaskStatus as TaskStatusModel, Label as LabelModel, Task as TaskModel, Comment as CommentModel, TaskActivity as TaskActivityModel } from '../../generated/tenant';
+import { TaskConnectionModel } from '../models';
 import { GraphQLContext } from '../context';
 export type Maybe<T> = T | null;
 export type InputMaybe<T> = Maybe<T>;
@@ -15,17 +8,17 @@ export type Omit<T, K extends keyof T> = Pick<T, Exclude<keyof T, K>>;
 export type RequireFields<T, K extends keyof T> = Omit<T, K> & { [P in K]-?: NonNullable<T[P]> };
 /** All built-in and custom scalars, mapped to their actual values */
 export type Scalars = {
-  ID: { input: string; output: string };
-  String: { input: string; output: string };
-  Boolean: { input: boolean; output: boolean };
-  Int: { input: number; output: number };
-  Float: { input: number; output: number };
+  ID: { input: string; output: string; }
+  String: { input: string; output: string; }
+  Boolean: { input: boolean; output: boolean; }
+  Int: { input: number; output: number; }
+  Float: { input: number; output: number; }
   /** Calendar date, YYYY-MM-DD. */
-  Date: { input: Date; output: Date };
+  Date: { input: Date; output: Date; }
   /** ISO-8601 date-time string. */
-  DateTime: { input: Date; output: Date };
+  DateTime: { input: Date; output: Date; }
   /** Arbitrary JSON value (activity from/to values). */
-  JSON: { input: unknown; output: unknown };
+  JSON: { input: unknown; output: unknown; }
 };
 
 export type ActivityType =
@@ -168,83 +161,102 @@ export type Mutation = {
   updateTask: Task;
 };
 
+
 export type MutationAddCommentArgs = {
   input: AddCommentInput;
 };
+
 
 export type MutationAddProjectMemberArgs = {
   projectId: Scalars['ID']['input'];
   userId: Scalars['ID']['input'];
 };
 
+
 export type MutationArchiveProjectArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type MutationCreateLabelArgs = {
   input: LabelInput;
 };
 
+
 export type MutationCreateProjectArgs = {
   input: CreateProjectInput;
 };
+
 
 export type MutationCreateStatusArgs = {
   input: CreateStatusInput;
 };
 
+
 export type MutationCreateTaskArgs = {
   input: CreateTaskInput;
 };
+
 
 export type MutationDeleteCommentArgs = {
   id: Scalars['ID']['input'];
 };
 
+
 export type MutationDeleteLabelArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type MutationDeleteStatusArgs = {
   id: Scalars['ID']['input'];
   moveTasksToStatusId: Scalars['ID']['input'];
 };
 
+
 export type MutationDeleteTaskArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type MutationEditCommentArgs = {
   body: Scalars['String']['input'];
   id: Scalars['ID']['input'];
 };
 
+
 export type MutationMoveStatusArgs = {
   input: MoveStatusInput;
 };
 
+
 export type MutationMoveTaskArgs = {
   input: MoveTaskInput;
 };
+
 
 export type MutationRemoveProjectMemberArgs = {
   projectId: Scalars['ID']['input'];
   userId: Scalars['ID']['input'];
 };
 
+
 export type MutationUnarchiveProjectArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type MutationUpdateProjectArgs = {
   id: Scalars['ID']['input'];
   input: UpdateProjectInput;
 };
 
+
 export type MutationUpdateStatusArgs = {
   id: Scalars['ID']['input'];
   input: UpdateStatusInput;
 };
+
 
 export type MutationUpdateTaskArgs = {
   id: Scalars['ID']['input'];
@@ -260,7 +272,10 @@ export type PageInfo = {
   startCursor?: Maybe<Scalars['String']['output']>;
 };
 
-export type Priority = 'HIGH' | 'LOW' | 'MEDIUM';
+export type Priority =
+  | 'HIGH'
+  | 'LOW'
+  | 'MEDIUM';
 
 export type Project = {
   __typename?: 'Project';
@@ -305,28 +320,34 @@ export type Query = {
   viewer: Viewer;
 };
 
+
 export type QueryMyTasksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
   filter?: InputMaybe<TaskFilter>;
   first?: InputMaybe<Scalars['Int']['input']>;
 };
 
+
 export type QueryProjectArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type QueryProjectSummaryArgs = {
   filter?: InputMaybe<TaskFilter>;
   projectId: Scalars['ID']['input'];
 };
 
+
 export type QueryProjectsArgs = {
   includeArchived?: InputMaybe<Scalars['Boolean']['input']>;
 };
 
+
 export type QueryTaskArgs = {
   id: Scalars['ID']['input'];
 };
+
 
 export type QueryTasksArgs = {
   after?: InputMaybe<Scalars['String']['input']>;
@@ -335,9 +356,17 @@ export type QueryTasksArgs = {
   projectId: Scalars['ID']['input'];
 };
 
-export type Role = 'ADMIN' | 'MEMBER' | 'OWNER' | 'VIEWER';
+export type Role =
+  | 'ADMIN'
+  | 'MEMBER'
+  | 'OWNER'
+  | 'VIEWER';
 
-export type StatusCategory = 'CANCELLED' | 'COMPLETED' | 'NOT_STARTED' | 'STARTED';
+export type StatusCategory =
+  | 'CANCELLED'
+  | 'COMPLETED'
+  | 'NOT_STARTED'
+  | 'STARTED';
 
 export type StatusCount = {
   __typename?: 'StatusCount';
@@ -455,37 +484,35 @@ export type Viewer = {
   user: User;
 };
 
+
+
 export type ResolverTypeWrapper<T> = Promise<T> | T;
+
 
 export type ResolverWithResolve<TResult, TParent, TContext, TArgs> = {
   resolve: ResolverFn<TResult, TParent, TContext, TArgs>;
 };
-export type Resolver<
-  TResult,
-  TParent = Record<PropertyKey, never>,
-  TContext = Record<PropertyKey, never>,
-  TArgs = Record<PropertyKey, never>,
-> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
+export type Resolver<TResult, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = ResolverFn<TResult, TParent, TContext, TArgs> | ResolverWithResolve<TResult, TParent, TContext, TArgs>;
 
 export type ResolverFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo,
+  info: GraphQLResolveInfo
 ) => Promise<TResult> | TResult;
 
 export type SubscriptionSubscribeFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo,
+  info: GraphQLResolveInfo
 ) => AsyncIterable<TResult> | Promise<AsyncIterable<TResult>>;
 
 export type SubscriptionResolveFn<TResult, TParent, TContext, TArgs> = (
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo,
+  info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
 
 export interface SubscriptionSubscriberObject<TResult, TKey extends string, TParent, TContext, TArgs> {
@@ -502,42 +529,31 @@ export type SubscriptionObject<TResult, TKey extends string, TParent, TContext, 
   | SubscriptionSubscriberObject<TResult, TKey, TParent, TContext, TArgs>
   | SubscriptionResolverObject<TResult, TParent, TContext, TArgs>;
 
-export type SubscriptionResolver<
-  TResult,
-  TKey extends string,
-  TParent = Record<PropertyKey, never>,
-  TContext = Record<PropertyKey, never>,
-  TArgs = Record<PropertyKey, never>,
-> =
+export type SubscriptionResolver<TResult, TKey extends string, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> =
   | ((...args: any[]) => SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>)
   | SubscriptionObject<TResult, TKey, TParent, TContext, TArgs>;
 
-export type TypeResolveFn<
-  TTypes,
-  TParent = Record<PropertyKey, never>,
-  TContext = Record<PropertyKey, never>,
-> = (parent: TParent, context: TContext, info: GraphQLResolveInfo) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
-
-export type IsTypeOfResolverFn<T = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (
-  obj: T,
+export type TypeResolveFn<TTypes, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (
+  parent: TParent,
   context: TContext,
-  info: GraphQLResolveInfo,
-) => boolean | Promise<boolean>;
+  info: GraphQLResolveInfo
+) => Maybe<TTypes> | Promise<Maybe<TTypes>>;
+
+export type IsTypeOfResolverFn<T = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>> = (obj: T, context: TContext, info: GraphQLResolveInfo) => boolean | Promise<boolean>;
 
 export type NextResolverFn<T> = () => Promise<T>;
 
-export type DirectiveResolverFn<
-  TResult = Record<PropertyKey, never>,
-  TParent = Record<PropertyKey, never>,
-  TContext = Record<PropertyKey, never>,
-  TArgs = Record<PropertyKey, never>,
-> = (
+export type DirectiveResolverFn<TResult = Record<PropertyKey, never>, TParent = Record<PropertyKey, never>, TContext = Record<PropertyKey, never>, TArgs = Record<PropertyKey, never>> = (
   next: NextResolverFn<TResult>,
   parent: TParent,
   args: TArgs,
   context: TContext,
-  info: GraphQLResolveInfo,
+  info: GraphQLResolveInfo
 ) => TResult | Promise<TResult>;
+
+
+
+
 
 /** Mapping between all available schema types and the resolvers types */
 export type ResolversTypes = {
@@ -565,12 +581,7 @@ export type ResolversTypes = {
   PageInfo: ResolverTypeWrapper<PageInfo>;
   Priority: Priority;
   Project: ResolverTypeWrapper<ProjectModel>;
-  ProjectSummary: ResolverTypeWrapper<
-    Omit<ProjectSummary, 'byAssignee' | 'byStatus'> & {
-      byAssignee: Array<ResolversTypes['AssigneeCount']>;
-      byStatus: Array<ResolversTypes['StatusCount']>;
-    }
-  >;
+  ProjectSummary: ResolverTypeWrapper<Omit<ProjectSummary, 'byAssignee' | 'byStatus'> & { byAssignee: Array<ResolversTypes['AssigneeCount']>, byStatus: Array<ResolversTypes['StatusCount']> }>;
   Query: ResolverTypeWrapper<Record<PropertyKey, never>>;
   Role: Role;
   StatusCategory: StatusCategory;
@@ -578,9 +589,7 @@ export type ResolversTypes = {
   String: ResolverTypeWrapper<Scalars['String']['output']>;
   Task: ResolverTypeWrapper<TaskModel>;
   TaskActivity: ResolverTypeWrapper<TaskActivityModel>;
-  TaskConnection: ResolverTypeWrapper<
-    Omit<TaskConnection, 'edges'> & { edges: Array<ResolversTypes['TaskEdge']> }
-  >;
+  TaskConnection: ResolverTypeWrapper<TaskConnectionModel>;
   TaskEdge: ResolverTypeWrapper<Omit<TaskEdge, 'node'> & { node: ResolversTypes['Task'] }>;
   TaskFilter: TaskFilter;
   TaskStatus: ResolverTypeWrapper<TaskStatusModel>;
@@ -615,16 +624,13 @@ export type ResolversParentTypes = {
   Mutation: Record<PropertyKey, never>;
   PageInfo: PageInfo;
   Project: ProjectModel;
-  ProjectSummary: Omit<ProjectSummary, 'byAssignee' | 'byStatus'> & {
-    byAssignee: Array<ResolversParentTypes['AssigneeCount']>;
-    byStatus: Array<ResolversParentTypes['StatusCount']>;
-  };
+  ProjectSummary: Omit<ProjectSummary, 'byAssignee' | 'byStatus'> & { byAssignee: Array<ResolversParentTypes['AssigneeCount']>, byStatus: Array<ResolversParentTypes['StatusCount']> };
   Query: Record<PropertyKey, never>;
   StatusCount: Omit<StatusCount, 'status'> & { status: ResolversParentTypes['TaskStatus'] };
   String: Scalars['String']['output'];
   Task: TaskModel;
   TaskActivity: TaskActivityModel;
-  TaskConnection: Omit<TaskConnection, 'edges'> & { edges: Array<ResolversParentTypes['TaskEdge']> };
+  TaskConnection: TaskConnectionModel;
   TaskEdge: Omit<TaskEdge, 'node'> & { node: ResolversParentTypes['Task'] };
   TaskFilter: TaskFilter;
   TaskStatus: TaskStatusModel;
@@ -635,27 +641,18 @@ export type ResolversParentTypes = {
   Viewer: Omit<Viewer, 'user'> & { user: ResolversParentTypes['User'] };
 };
 
-export type AssigneeCountResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['AssigneeCount'] = ResolversParentTypes['AssigneeCount'],
-> = {
+export type AssigneeCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['AssigneeCount'] = ResolversParentTypes['AssigneeCount']> = {
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   overdue?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   user?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
 };
 
-export type CategoryCountResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['CategoryCount'] = ResolversParentTypes['CategoryCount'],
-> = {
+export type CategoryCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['CategoryCount'] = ResolversParentTypes['CategoryCount']> = {
   category?: Resolver<ResolversTypes['StatusCategory'], ParentType, ContextType>;
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
-export type CommentResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Comment'] = ResolversParentTypes['Comment'],
-> = {
+export type CommentResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Comment'] = ResolversParentTypes['Comment']> = {
   author?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   body?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -680,150 +677,43 @@ export interface JsonScalarConfig extends GraphQLScalarTypeConfig<ResolversTypes
   name: 'JSON';
 }
 
-export type LabelResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Label'] = ResolversParentTypes['Label'],
-> = {
+export type LabelResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Label'] = ResolversParentTypes['Label']> = {
   color?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   name?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type MutationResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation'],
-> = {
+export type MutationResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Mutation'] = ResolversParentTypes['Mutation']> = {
   _noop?: Resolver<Maybe<ResolversTypes['Boolean']>, ParentType, ContextType>;
-  addComment?: Resolver<
-    ResolversTypes['Comment'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationAddCommentArgs, 'input'>
-  >;
-  addProjectMember?: Resolver<
-    ResolversTypes['Project'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationAddProjectMemberArgs, 'projectId' | 'userId'>
-  >;
-  archiveProject?: Resolver<
-    ResolversTypes['Project'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationArchiveProjectArgs, 'id'>
-  >;
-  createLabel?: Resolver<
-    ResolversTypes['Label'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateLabelArgs, 'input'>
-  >;
-  createProject?: Resolver<
-    ResolversTypes['Project'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateProjectArgs, 'input'>
-  >;
-  createStatus?: Resolver<
-    ResolversTypes['TaskStatus'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateStatusArgs, 'input'>
-  >;
-  createTask?: Resolver<
-    ResolversTypes['Task'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationCreateTaskArgs, 'input'>
-  >;
-  deleteComment?: Resolver<
-    ResolversTypes['Boolean'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteCommentArgs, 'id'>
-  >;
-  deleteLabel?: Resolver<
-    ResolversTypes['Boolean'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteLabelArgs, 'id'>
-  >;
-  deleteStatus?: Resolver<
-    ResolversTypes['Boolean'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteStatusArgs, 'id' | 'moveTasksToStatusId'>
-  >;
-  deleteTask?: Resolver<
-    ResolversTypes['Boolean'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationDeleteTaskArgs, 'id'>
-  >;
-  editComment?: Resolver<
-    ResolversTypes['Comment'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationEditCommentArgs, 'body' | 'id'>
-  >;
-  moveStatus?: Resolver<
-    ResolversTypes['TaskStatus'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationMoveStatusArgs, 'input'>
-  >;
-  moveTask?: Resolver<
-    ResolversTypes['Task'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationMoveTaskArgs, 'input'>
-  >;
-  removeProjectMember?: Resolver<
-    ResolversTypes['Project'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationRemoveProjectMemberArgs, 'projectId' | 'userId'>
-  >;
-  unarchiveProject?: Resolver<
-    ResolversTypes['Project'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationUnarchiveProjectArgs, 'id'>
-  >;
-  updateProject?: Resolver<
-    ResolversTypes['Project'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateProjectArgs, 'id' | 'input'>
-  >;
-  updateStatus?: Resolver<
-    ResolversTypes['TaskStatus'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateStatusArgs, 'id' | 'input'>
-  >;
-  updateTask?: Resolver<
-    ResolversTypes['Task'],
-    ParentType,
-    ContextType,
-    RequireFields<MutationUpdateTaskArgs, 'id' | 'input'>
-  >;
+  addComment?: Resolver<ResolversTypes['Comment'], ParentType, ContextType, RequireFields<MutationAddCommentArgs, 'input'>>;
+  addProjectMember?: Resolver<ResolversTypes['Project'], ParentType, ContextType, RequireFields<MutationAddProjectMemberArgs, 'projectId' | 'userId'>>;
+  archiveProject?: Resolver<ResolversTypes['Project'], ParentType, ContextType, RequireFields<MutationArchiveProjectArgs, 'id'>>;
+  createLabel?: Resolver<ResolversTypes['Label'], ParentType, ContextType, RequireFields<MutationCreateLabelArgs, 'input'>>;
+  createProject?: Resolver<ResolversTypes['Project'], ParentType, ContextType, RequireFields<MutationCreateProjectArgs, 'input'>>;
+  createStatus?: Resolver<ResolversTypes['TaskStatus'], ParentType, ContextType, RequireFields<MutationCreateStatusArgs, 'input'>>;
+  createTask?: Resolver<ResolversTypes['Task'], ParentType, ContextType, RequireFields<MutationCreateTaskArgs, 'input'>>;
+  deleteComment?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteCommentArgs, 'id'>>;
+  deleteLabel?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteLabelArgs, 'id'>>;
+  deleteStatus?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteStatusArgs, 'id' | 'moveTasksToStatusId'>>;
+  deleteTask?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType, RequireFields<MutationDeleteTaskArgs, 'id'>>;
+  editComment?: Resolver<ResolversTypes['Comment'], ParentType, ContextType, RequireFields<MutationEditCommentArgs, 'body' | 'id'>>;
+  moveStatus?: Resolver<ResolversTypes['TaskStatus'], ParentType, ContextType, RequireFields<MutationMoveStatusArgs, 'input'>>;
+  moveTask?: Resolver<ResolversTypes['Task'], ParentType, ContextType, RequireFields<MutationMoveTaskArgs, 'input'>>;
+  removeProjectMember?: Resolver<ResolversTypes['Project'], ParentType, ContextType, RequireFields<MutationRemoveProjectMemberArgs, 'projectId' | 'userId'>>;
+  unarchiveProject?: Resolver<ResolversTypes['Project'], ParentType, ContextType, RequireFields<MutationUnarchiveProjectArgs, 'id'>>;
+  updateProject?: Resolver<ResolversTypes['Project'], ParentType, ContextType, RequireFields<MutationUpdateProjectArgs, 'id' | 'input'>>;
+  updateStatus?: Resolver<ResolversTypes['TaskStatus'], ParentType, ContextType, RequireFields<MutationUpdateStatusArgs, 'id' | 'input'>>;
+  updateTask?: Resolver<ResolversTypes['Task'], ParentType, ContextType, RequireFields<MutationUpdateTaskArgs, 'id' | 'input'>>;
 };
 
-export type PageInfoResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo'],
-> = {
+export type PageInfoResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['PageInfo'] = ResolversParentTypes['PageInfo']> = {
   endCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
   hasNextPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   hasPreviousPage?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
   startCursor?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
 };
 
-export type ProjectResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Project'] = ResolversParentTypes['Project'],
-> = {
+export type ProjectResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Project'] = ResolversParentTypes['Project']> = {
   archivedAt?: Resolver<Maybe<ResolversTypes['DateTime']>, ParentType, ContextType>;
   archivedBy?: Resolver<Maybe<ResolversTypes['User']>, ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
@@ -838,10 +728,7 @@ export type ProjectResolvers<
   title?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
 };
 
-export type ProjectSummaryResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['ProjectSummary'] = ResolversParentTypes['ProjectSummary'],
-> = {
+export type ProjectSummaryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['ProjectSummary'] = ResolversParentTypes['ProjectSummary']> = {
   byAssignee?: Resolver<Array<ResolversTypes['AssigneeCount']>, ParentType, ContextType>;
   byCategory?: Resolver<Array<ResolversTypes['CategoryCount']>, ParentType, ContextType>;
   byStatus?: Resolver<Array<ResolversTypes['StatusCount']>, ParentType, ContextType>;
@@ -849,56 +736,22 @@ export type ProjectSummaryResolvers<
   total?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
-export type QueryResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query'],
-> = {
-  myTasks?: Resolver<
-    ResolversTypes['TaskConnection'],
-    ParentType,
-    ContextType,
-    RequireFields<QueryMyTasksArgs, 'first'>
-  >;
-  project?: Resolver<
-    Maybe<ResolversTypes['Project']>,
-    ParentType,
-    ContextType,
-    RequireFields<QueryProjectArgs, 'id'>
-  >;
-  projectSummary?: Resolver<
-    ResolversTypes['ProjectSummary'],
-    ParentType,
-    ContextType,
-    RequireFields<QueryProjectSummaryArgs, 'projectId'>
-  >;
-  projects?: Resolver<
-    Array<ResolversTypes['Project']>,
-    ParentType,
-    ContextType,
-    RequireFields<QueryProjectsArgs, 'includeArchived'>
-  >;
+export type QueryResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Query'] = ResolversParentTypes['Query']> = {
+  myTasks?: Resolver<ResolversTypes['TaskConnection'], ParentType, ContextType, RequireFields<QueryMyTasksArgs, 'first'>>;
+  project?: Resolver<Maybe<ResolversTypes['Project']>, ParentType, ContextType, RequireFields<QueryProjectArgs, 'id'>>;
+  projectSummary?: Resolver<ResolversTypes['ProjectSummary'], ParentType, ContextType, RequireFields<QueryProjectSummaryArgs, 'projectId'>>;
+  projects?: Resolver<Array<ResolversTypes['Project']>, ParentType, ContextType, RequireFields<QueryProjectsArgs, 'includeArchived'>>;
   task?: Resolver<Maybe<ResolversTypes['Task']>, ParentType, ContextType, RequireFields<QueryTaskArgs, 'id'>>;
-  tasks?: Resolver<
-    ResolversTypes['TaskConnection'],
-    ParentType,
-    ContextType,
-    RequireFields<QueryTasksArgs, 'first' | 'projectId'>
-  >;
+  tasks?: Resolver<ResolversTypes['TaskConnection'], ParentType, ContextType, RequireFields<QueryTasksArgs, 'first' | 'projectId'>>;
   viewer?: Resolver<ResolversTypes['Viewer'], ParentType, ContextType>;
 };
 
-export type StatusCountResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['StatusCount'] = ResolversParentTypes['StatusCount'],
-> = {
+export type StatusCountResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['StatusCount'] = ResolversParentTypes['StatusCount']> = {
   count?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
   status?: Resolver<ResolversTypes['TaskStatus'], ParentType, ContextType>;
 };
 
-export type TaskResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Task'] = ResolversParentTypes['Task'],
-> = {
+export type TaskResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Task'] = ResolversParentTypes['Task']> = {
   activity?: Resolver<Array<ResolversTypes['TaskActivity']>, ParentType, ContextType>;
   assignees?: Resolver<Array<ResolversTypes['User']>, ParentType, ContextType>;
   commentCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
@@ -921,10 +774,7 @@ export type TaskResolvers<
   updatedAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
 };
 
-export type TaskActivityResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['TaskActivity'] = ResolversParentTypes['TaskActivity'],
-> = {
+export type TaskActivityResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TaskActivity'] = ResolversParentTypes['TaskActivity']> = {
   actor?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
   createdAt?: Resolver<ResolversTypes['DateTime'], ParentType, ContextType>;
   field?: Resolver<Maybe<ResolversTypes['String']>, ParentType, ContextType>;
@@ -934,27 +784,18 @@ export type TaskActivityResolvers<
   type?: Resolver<ResolversTypes['ActivityType'], ParentType, ContextType>;
 };
 
-export type TaskConnectionResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['TaskConnection'] = ResolversParentTypes['TaskConnection'],
-> = {
+export type TaskConnectionResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TaskConnection'] = ResolversParentTypes['TaskConnection']> = {
   edges?: Resolver<Array<ResolversTypes['TaskEdge']>, ParentType, ContextType>;
   pageInfo?: Resolver<ResolversTypes['PageInfo'], ParentType, ContextType>;
   totalCount?: Resolver<ResolversTypes['Int'], ParentType, ContextType>;
 };
 
-export type TaskEdgeResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['TaskEdge'] = ResolversParentTypes['TaskEdge'],
-> = {
+export type TaskEdgeResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TaskEdge'] = ResolversParentTypes['TaskEdge']> = {
   cursor?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   node?: Resolver<ResolversTypes['Task'], ParentType, ContextType>;
 };
 
-export type TaskStatusResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['TaskStatus'] = ResolversParentTypes['TaskStatus'],
-> = {
+export type TaskStatusResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['TaskStatus'] = ResolversParentTypes['TaskStatus']> = {
   category?: Resolver<ResolversTypes['StatusCategory'], ParentType, ContextType>;
   color?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
@@ -962,10 +803,7 @@ export type TaskStatusResolvers<
   position?: Resolver<ResolversTypes['Float'], ParentType, ContextType>;
 };
 
-export type UserResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User'],
-> = {
+export type UserResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['User'] = ResolversParentTypes['User']> = {
   email?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   id?: Resolver<ResolversTypes['ID'], ParentType, ContextType>;
   isActive?: Resolver<ResolversTypes['Boolean'], ParentType, ContextType>;
@@ -973,10 +811,7 @@ export type UserResolvers<
   role?: Resolver<ResolversTypes['Role'], ParentType, ContextType>;
 };
 
-export type ViewerResolvers<
-  ContextType = GraphQLContext,
-  ParentType extends ResolversParentTypes['Viewer'] = ResolversParentTypes['Viewer'],
-> = {
+export type ViewerResolvers<ContextType = GraphQLContext, ParentType extends ResolversParentTypes['Viewer'] = ResolversParentTypes['Viewer']> = {
   orgSlug?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   timezone?: Resolver<ResolversTypes['String'], ParentType, ContextType>;
   user?: Resolver<ResolversTypes['User'], ParentType, ContextType>;
@@ -1004,3 +839,4 @@ export type Resolvers<ContextType = GraphQLContext> = {
   User?: UserResolvers<ContextType>;
   Viewer?: ViewerResolvers<ContextType>;
 };
+

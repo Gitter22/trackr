@@ -99,7 +99,7 @@ JOIN project_members m ON m.project_id = t.project_id AND m.user_id = $me  -- sk
 WHERE t.deleted_at IS NULL
   AND t.due_date < (now() AT TIME ZONE $orgTz)::date
   AND s.category NOT IN ('COMPLETED','CANCELLED')
-ORDER BY t.due_date, t.id
+ORDER BY t.rank, t.id   -- same (rank, id) cursor as the board
 LIMIT 51;
 ```
 
