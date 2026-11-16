@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { permissionsFor } from '../permissions';
 import { useTenantSession } from '../session';
 import { useProject } from './queries';
+import { BoardPage, InsightsPage } from '../board/BoardPage';
 import { ProjectSettings } from './ProjectSettings';
 
 const tab = ({ isActive }: { isActive: boolean }) =>
@@ -48,12 +49,16 @@ export function ProjectPage() {
         <NavLink end to={`/projects/${p.id}`} className={tab}>
           Board
         </NavLink>
+        <NavLink to={`/projects/${p.id}/insights`} className={tab}>
+          Insights
+        </NavLink>
         <NavLink to={`/projects/${p.id}/settings`} className={tab}>
           {can.manageStatuses ? 'Settings' : 'Details'}
         </NavLink>
       </nav>
       <Routes>
-        <Route index element={<p className="text-muted-foreground">The board comes next.</p>} />
+        <Route index element={<BoardPage project={p} />} />
+        <Route path="insights" element={<InsightsPage project={p} />} />
         <Route path="settings" element={<ProjectSettings project={p} />} />
       </Routes>
     </>

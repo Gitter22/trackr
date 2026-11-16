@@ -22,7 +22,7 @@
   - [x] D9 Web foundations
   - [x] D10 Marketing, admin panel, 404
   - [x] D11 Tenant app: users, projects, statuses
-  - [ ] D12 Kanban board, filters, chart, task drawer
+  - [x] D12 Kanban board, filters, chart, task drawer
   - [ ] D13 Browser end-to-end check
   - [ ] D14 README, CLAUDE.md, clean Docker run
 
