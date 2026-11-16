@@ -31,12 +31,16 @@ model User {
   createdAt    DateTime @default(now())
   updatedAt    DateTime @updatedAt
 
-  memberships     ProjectMember[]
-  createdProjects Project[]       @relation("ProjectCreatedBy")
-  createdTasks    Task[]          @relation("TaskCreatedBy")
-  assignments     TaskAssignee[]
-  comments        Comment[]
-  activities      TaskActivity[]
+  memberships      ProjectMember[]
+  createdProjects  Project[]       @relation("ProjectCreatedBy")
+  createdTasks     Task[]          @relation("TaskCreatedBy")
+  assignments      TaskAssignee[]
+  comments         Comment[]
+  activities       TaskActivity[]
+  archivedProjects Project[]       @relation("ProjectArchivedBy")
+  deletedTasks     Task[]          @relation("TaskDeletedBy")
+  deletedLabels    Label[]         @relation("LabelDeletedBy")
+  deletedComments  Comment[]       @relation("CommentDeletedBy")
 
   @@map("users")
 }
@@ -52,18 +56,21 @@ model OrgSetting {
 }
 
 model Project {
-  id          String    @id @default(uuid()) @db.Uuid
-  title       String
-  description String?
+  id           String    @id @default(uuid()) @db.Uuid
+  title        String
+  description  String?
   /// e.g. "KIK". Uppercase, 2-6 chars. Prefix for task keys (KIK-12).
-  shortCode   String    @unique
-  archivedAt  DateTime?
+  shortCode    String    @unique
+  archivedAt   DateTime?
+  /// Who archived it. Cleared on unarchive.
+  archivedById String?   @db.Uuid
+  archivedBy   User?     @relation("ProjectArchivedBy", fields: [archivedById], references: [id])
   /// Last issued task number. Incremented in the same transaction as task create.
-  taskSeq     Int       @default(0)
-  createdById String    @db.Uuid
-  createdBy   User      @relation("ProjectCreatedBy", fields: [createdById], references: [id])
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  taskSeq      Int       @default(0)
+  createdById  String    @db.Uuid
+  createdBy    User      @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   members  ProjectMember[]
   statuses TaskStatus[]
@@ -123,23 +130,26 @@ enum Priority {
 }
 
 model Task {
-  id          String     @id @default(uuid()) @db.Uuid
-  projectId   String     @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  projectId   String    @db.Uuid
   /// Per-project sequence number; key = Project.shortCode + "-" + number.
   number      Int
   title       String
   description String?
-  priority    Priority   @default(MEDIUM)
-  statusId    String     @db.Uuid
+  priority    Priority  @default(MEDIUM)
+  statusId    String    @db.Uuid
   /// Fractional order within the board column (1000, 2000...). Pagination cursor.
   rank        Float
-  dueDate     DateTime?  @db.Date
+  dueDate     DateTime? @db.Date
   /// Set when the task enters a COMPLETED status, cleared when it leaves.
   completedAt DateTime?
-  createdById String     @db.Uuid
-  createdAt   DateTime   @default(now())
-  updatedAt   DateTime   @updatedAt
+  createdById String    @db.Uuid
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  /// Soft delete: row stays so it can be audited or restored later.
   deletedAt   DateTime?
+  deletedById String?   @db.Uuid
+  deletedBy   User?     @relation("TaskDeletedBy", fields: [deletedById], references: [id])
 
   project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
   status     TaskStatus     @relation(fields: [statusId], references: [id], onDelete: Restrict)
@@ -177,12 +187,18 @@ model TaskAssignee {
 }
 
 model Label {
-  id        String      @id @default(uuid()) @db.Uuid
-  projectId String      @db.Uuid
-  name      String
-  color     String      @default("#7600FD")
-  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
-  tasks     TaskLabel[]
+  id          String      @id @default(uuid()) @db.Uuid
+  projectId   String      @db.Uuid
+  name        String
+  color       String      @default("#7600FD")
+  createdAt   DateTime    @default(now())
+  /// Soft delete. Re-creating a label with the same name restores this row
+  /// (keeps @@unique([projectId, name]) valid).
+  deletedAt   DateTime?
+  deletedById String?     @db.Uuid
+  deletedBy   User?       @relation("LabelDeletedBy", fields: [deletedById], references: [id])
+  project     Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks       TaskLabel[]
 
   @@unique([projectId, name])
   @@map("labels")
@@ -200,15 +216,18 @@ model TaskLabel {
 }
 
 model Comment {
-  id        String    @id @default(uuid()) @db.Uuid
-  taskId    String    @db.Uuid
-  authorId  String    @db.Uuid
+  id          String    @id @default(uuid()) @db.Uuid
+  taskId      String    @db.Uuid
+  authorId    String    @db.Uuid
   /// Replies are one level deep: a reply's parent must have parentId = null (checked in code).
-  parentId  String?   @db.Uuid
-  body      String
-  createdAt DateTime  @default(now())
-  editedAt  DateTime?
-  deletedAt DateTime?
+  parentId    String?   @db.Uuid
+  body        String
+  createdAt   DateTime  @default(now())
+  editedAt    DateTime?
+  /// Soft delete. A deleted comment with replies shows as "deleted" so the thread stays.
+  deletedAt   DateTime?
+  deletedById String?   @db.Uuid
+  deletedBy   User?     @relation("CommentDeletedBy", fields: [deletedById], references: [id])
 
   task    Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
   author  User      @relation(fields: [authorId], references: [id])
@@ -229,10 +248,14 @@ enum ActivityType {
   LABEL_ADDED
   LABEL_REMOVED
   COMMENTED
+  COMMENT_DELETED
   DELETED
+  RESTORED
 }
 
 /// Append-only. Written in the same transaction as the change it records.
+/// Deletes are logged here too (DELETED, COMMENT_DELETED, LABEL_REMOVED), so the
+/// task history shows who removed what even after the row is soft-deleted.
 model TaskActivity {
   id        String       @id @default(uuid()) @db.Uuid
   taskId    String       @db.Uuid

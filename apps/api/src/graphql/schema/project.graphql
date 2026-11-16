@@ -4,6 +4,8 @@ type Project {
   description: String
   shortCode: String!
   archivedAt: DateTime
+  """Who archived it; null when active."""
+  archivedBy: User
   createdAt: DateTime!
   createdBy: User!
   members: [User!]!

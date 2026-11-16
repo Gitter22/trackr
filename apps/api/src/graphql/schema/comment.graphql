@@ -1,7 +1,12 @@
 type Comment {
   id: ID!
+  """Empty string when deleted."""
   body: String!
   author: User!
+  """Deleted comments still appear if they have replies, shown as deleted."""
+  isDeleted: Boolean!
+  deletedAt: DateTime
+  deletedBy: User
   createdAt: DateTime!
   editedAt: DateTime
   """Null for top-level comments."""
@@ -19,7 +24,9 @@ enum ActivityType {
   LABEL_ADDED
   LABEL_REMOVED
   COMMENTED
+  COMMENT_DELETED
   DELETED
+  RESTORED
 }
 
 type TaskActivity {
