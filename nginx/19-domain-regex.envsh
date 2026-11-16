@@ -1,0 +1,5 @@
+#!/bin/sh
+# Sourced by the nginx image entrypoint before templates are rendered.
+# Escapes dots so APP_DOMAIN can be used inside a regex server_name.
+export APP_DOMAIN_RE=$(printf '%s' "$APP_DOMAIN" | sed 's/\./\\./g')
+export NGINX_ENVSUBST_FILTER='APP_DOMAIN|PROXY_SECRET'

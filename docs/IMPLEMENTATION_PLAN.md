@@ -12,7 +12,7 @@
 - [x] **Phase C** — Critical analysis (`docs/CRITICAL_ANALYSIS.md`) — _waiting for review_
 - [ ] **Phase D** — Build (D1–D14)
   - [x] D1 Monorepo tooling: workspaces, eslint/prettier, husky + lint-staged, Zod env config
-  - [ ] D2 Docker compose, Nginx, Postgres, Redis
+  - [x] D2 Docker compose, Nginx, Postgres, Redis
   - [ ] D3 Control plane auth and admin routes
   - [ ] D4 Tenant provisioning
   - [ ] D5 Tenant middlewares (resolver, rate limit, Prisma pool, auth)
