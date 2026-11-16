@@ -72,7 +72,7 @@ describe('filters', () => {
     const f = {
       ...EMPTY_FILTERS,
       search: 'login',
-      assigneeId: 'u1',
+      assigneeId: '2f022638-460e-43d1-9566-ee220d6292e7',
       priority: 'HIGH' as const,
       dueFrom: '2026-11-01',
       overdue: true,
@@ -100,8 +100,9 @@ describe('filters', () => {
     expect(toTaskFilter(EMPTY_FILTERS)).toEqual({});
   });
 
-  it('ignores unknown priority values', () => {
-    expect(readFilters(new URLSearchParams('priority=URGENT')).priority).toBe('');
+  it('ignores malformed values from hand-edited URLs', () => {
+    const f = readFilters(new URLSearchParams('priority=URGENT&assignee=garbage&status=1&from=yesterday'));
+    expect(f).toEqual(EMPTY_FILTERS);
   });
 });
 

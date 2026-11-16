@@ -44,6 +44,14 @@ function keepKnownErrors(error: unknown, message: string, isDev?: boolean): Erro
         extensions: { code: 'FORBIDDEN' },
       });
     }
+    // Prisma P2023: a malformed UUID reached the database (e.g. a pasted URL filter).
+    if ('code' in original && original.code === 'P2023') {
+      return new GraphQLError('Invalid ID', {
+        nodes: error.nodes,
+        path: error.path,
+        extensions: { code: 'BAD_USER_INPUT' },
+      });
+    }
   }
   return maskError(error, message, isDev);
 }

@@ -35,6 +35,11 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(409).json({ error: { code: 'CONFLICT', message: 'Already exists' } });
     return;
   }
+  // Prisma P2023: malformed UUID in a path or body (e.g. PATCH /users/not-a-uuid)
+  if (err && typeof err === 'object' && 'code' in err && err.code === 'P2023') {
+    res.status(400).json({ error: { code: 'VALIDATION', message: 'Invalid ID' } });
+    return;
+  }
   console.error(err);
   res.status(500).json({ error: { code: 'INTERNAL', message: 'Something went wrong' } });
 };

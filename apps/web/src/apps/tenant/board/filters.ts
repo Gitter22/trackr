@@ -12,16 +12,21 @@ export interface BoardFilters {
 }
 
 const PRIORITIES: Priority[] = ['LOW', 'MEDIUM', 'HIGH'];
+const UUID = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+const DATE = /^\d{4}-\d{2}-\d{2}$/;
+/** Hand-edited or stale URLs: keep only well-formed values. */
+const id = (v: string | null) => (v && UUID.test(v) ? v : '');
+const date = (v: string | null) => (v && DATE.test(v) ? v : '');
 
 export function readFilters(params: URLSearchParams): BoardFilters {
   const priority = params.get('priority') as Priority | null;
   return {
     search: params.get('q') ?? '',
-    statusId: params.get('status') ?? '',
-    assigneeId: params.get('assignee') ?? '',
+    statusId: id(params.get('status')),
+    assigneeId: id(params.get('assignee')),
     priority: priority && PRIORITIES.includes(priority) ? priority : '',
-    dueFrom: params.get('from') ?? '',
-    dueTo: params.get('to') ?? '',
+    dueFrom: date(params.get('from')),
+    dueTo: date(params.get('to')),
     overdue: params.get('overdue') === '1',
   };
 }

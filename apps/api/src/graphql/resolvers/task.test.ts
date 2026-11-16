@@ -117,6 +117,19 @@ describe('cursor pagination', () => {
     expect(seen).toEqual(sorted);
   });
 
+  it('answers BAD_USER_INPUT (not a 500) for malformed IDs', async () => {
+    expect(errorCode(await h.gql(owner, PAGE, { p: projectId, f: { assigneeIds: ['garbage'] } }))).toBe(
+      'BAD_USER_INPUT',
+    );
+    expect(errorCode(await h.gql(owner, 'query { task(id: "nope") { id } }'))).toBe('BAD_USER_INPUT');
+    const rest = await h
+      .http()
+      .patch('/api/tenant/users/not-a-uuid')
+      .set('Authorization', `Bearer ${owner}`)
+      .send({ name: 'x' });
+    expect(rest.status).toBe(400);
+  });
+
   it('caps page size and rejects bad cursors', async () => {
     const r = await h.gql<{ tasks: { edges: unknown[] } }>(owner, PAGE, { p: projectId, first: 1000 });
     expect(r.data!.tasks.edges.length).toBeLessThanOrEqual(100);
