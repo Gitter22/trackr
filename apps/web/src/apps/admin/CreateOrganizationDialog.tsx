@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Plus } from 'lucide-react';
 import { useMemo, useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { toast } from 'sonner';
 import { z } from 'zod';
 import { errorMessage } from '@/api/errors';
@@ -43,13 +43,13 @@ export function CreateOrganizationDialog() {
   const [slugTouched, setSlugTouched] = useState(false);
   const owners = useOwners();
   const create = useCreateOrganization();
-  const zones = useMemo(timezones, []);
+  const zones = useMemo(() => timezones(), []);
   const form = useForm<FormIn, unknown, FormOut>({
     resolver: zodResolver(orgSchema),
     defaultValues: { title: '', slug: '', ownerId: '', projectLimit: '10', timezone: browserTimezone() },
   });
   const { errors } = form.formState;
-  const slug = form.watch('slug');
+  const slug = useWatch({ control: form.control, name: 'slug' });
 
   const close = () => {
     setOpen(false);
