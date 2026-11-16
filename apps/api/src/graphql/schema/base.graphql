@@ -1,0 +1,44 @@
+"""ISO-8601 date-time string."""
+scalar DateTime
+"""Calendar date, YYYY-MM-DD."""
+scalar Date
+"""Arbitrary JSON value (activity from/to values)."""
+scalar JSON
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+type User {
+  id: ID!
+  email: String!
+  name: String!
+  role: Role!
+  isActive: Boolean!
+}
+
+"""The signed-in user plus what the UI needs to show or hide."""
+type Viewer {
+  user: User!
+  orgSlug: String!
+  timezone: String!
+}
+
+"""Relay page info. Cursors are opaque (base64 of "rank:id")."""
+type PageInfo {
+  hasNextPage: Boolean!
+  hasPreviousPage: Boolean!
+  startCursor: String
+  endCursor: String
+}
+
+type Query {
+  viewer: Viewer!
+}
+
+type Mutation {
+  _noop: Boolean
+}

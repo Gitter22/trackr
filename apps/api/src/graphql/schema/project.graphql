@@ -1,0 +1,100 @@
+type Project {
+  id: ID!
+  title: String!
+  description: String
+  shortCode: String!
+  archivedAt: DateTime
+  createdAt: DateTime!
+  createdBy: User!
+  members: [User!]!
+  """Ordered by position."""
+  statuses: [TaskStatus!]!
+  labels: [Label!]!
+  """Total live (non-deleted) tasks."""
+  taskCount: Int!
+}
+
+enum StatusCategory {
+  NOT_STARTED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+type TaskStatus {
+  id: ID!
+  name: String!
+  category: StatusCategory!
+  position: Float!
+  color: String!
+}
+
+type Label {
+  id: ID!
+  name: String!
+  color: String!
+}
+
+input CreateProjectInput {
+  title: String!
+  description: String
+  shortCode: String!
+  memberIds: [ID!]
+}
+
+input UpdateProjectInput {
+  title: String
+  description: String
+}
+
+input CreateStatusInput {
+  projectId: ID!
+  name: String!
+  category: StatusCategory!
+  color: String
+  """Place after this status; omit to append at the end."""
+  afterStatusId: ID
+}
+
+input UpdateStatusInput {
+  name: String
+  category: StatusCategory
+  color: String
+}
+
+input MoveStatusInput {
+  id: ID!
+  """Neighbours after the move; null means start/end of the list."""
+  beforeStatusId: ID
+  afterStatusId: ID
+}
+
+input LabelInput {
+  projectId: ID!
+  name: String!
+  color: String
+}
+
+extend type Query {
+  """Owner sees all; others see only projects they are members of."""
+  projects(includeArchived: Boolean = false): [Project!]!
+  project(id: ID!): Project
+}
+
+extend type Mutation {
+  createProject(input: CreateProjectInput!): Project!
+  updateProject(id: ID!, input: UpdateProjectInput!): Project!
+  archiveProject(id: ID!): Project!
+  unarchiveProject(id: ID!): Project!
+  addProjectMember(projectId: ID!, userId: ID!): Project!
+  removeProjectMember(projectId: ID!, userId: ID!): Project!
+
+  createStatus(input: CreateStatusInput!): TaskStatus!
+  updateStatus(id: ID!, input: UpdateStatusInput!): TaskStatus!
+  moveStatus(input: MoveStatusInput!): TaskStatus!
+  """Tasks in the deleted status move to moveTasksToStatusId."""
+  deleteStatus(id: ID!, moveTasksToStatusId: ID!): Boolean!
+
+  createLabel(input: LabelInput!): Label!
+  deleteLabel(id: ID!): Boolean!
+}

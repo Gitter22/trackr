@@ -1,0 +1,252 @@
+// Tenant schema: applied to every tenant_<slug>_db.
+// The URL is built at runtime per tenant; TENANT_DATABASE_URL is only used by
+// the migration CLI and provisioning (it is overridden per database).
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../apps/api/src/generated/tenant"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("TENANT_DATABASE_URL")
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+  VIEWER
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  name         String
+  passwordHash String
+  role         Role     @default(MEMBER)
+  isActive     Boolean  @default(true)
+  /// Bumped on deactivate / role change so old JWTs stop working.
+  tokenVersion Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  memberships     ProjectMember[]
+  createdProjects Project[]       @relation("ProjectCreatedBy")
+  createdTasks    Task[]          @relation("TaskCreatedBy")
+  assignments     TaskAssignee[]
+  comments        Comment[]
+  activities      TaskActivity[]
+
+  @@map("users")
+}
+
+/// Workspace-level settings (the spec's "OrgRule"). Key/value so new settings
+/// need no migration. Seeded at provisioning: timezone, projectLimit.
+model OrgSetting {
+  key       String   @id
+  value     Json
+  updatedAt DateTime @updatedAt
+
+  @@map("org_settings")
+}
+
+model Project {
+  id          String    @id @default(uuid()) @db.Uuid
+  title       String
+  description String?
+  /// e.g. "KIK". Uppercase, 2-6 chars. Prefix for task keys (KIK-12).
+  shortCode   String    @unique
+  archivedAt  DateTime?
+  /// Last issued task number. Incremented in the same transaction as task create.
+  taskSeq     Int       @default(0)
+  createdById String    @db.Uuid
+  createdBy   User      @relation("ProjectCreatedBy", fields: [createdById], references: [id])
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  members  ProjectMember[]
+  statuses TaskStatus[]
+  tasks    Task[]
+  labels   Label[]
+
+  @@index([archivedAt])
+  @@map("projects")
+}
+
+model ProjectMember {
+  projectId String   @db.Uuid
+  userId    String   @db.Uuid
+  addedAt   DateTime @default(now())
+  project   Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([projectId, userId])
+  /// "Which projects can this user see?"
+  @@index([userId])
+  @@map("project_members")
+}
+
+/// Fixed categories so analytics work across custom statuses.
+/// "Overdue" is NOT a category: it is derived (dueDate passed and category not
+/// COMPLETED/CANCELLED). See docs/TECHNICAL_DESIGN.md.
+enum StatusCategory {
+  NOT_STARTED
+  STARTED
+  COMPLETED
+  CANCELLED
+}
+
+model TaskStatus {
+  id        String         @id @default(uuid()) @db.Uuid
+  projectId String         @db.Uuid
+  name      String
+  category  StatusCategory
+  /// Fractional order: 100, 200, 300... insert between with the midpoint.
+  position  Float
+  color     String         @default("#6B7280")
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks   Task[]
+
+  @@unique([projectId, name])
+  @@index([projectId, position])
+  @@map("task_statuses")
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+model Task {
+  id          String     @id @default(uuid()) @db.Uuid
+  projectId   String     @db.Uuid
+  /// Per-project sequence number; key = Project.shortCode + "-" + number.
+  number      Int
+  title       String
+  description String?
+  priority    Priority   @default(MEDIUM)
+  statusId    String     @db.Uuid
+  /// Fractional order within the board column (1000, 2000...). Pagination cursor.
+  rank        Float
+  dueDate     DateTime?  @db.Date
+  /// Set when the task enters a COMPLETED status, cleared when it leaves.
+  completedAt DateTime?
+  createdById String     @db.Uuid
+  createdAt   DateTime   @default(now())
+  updatedAt   DateTime   @updatedAt
+  deletedAt   DateTime?
+
+  project    Project        @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  status     TaskStatus     @relation(fields: [statusId], references: [id], onDelete: Restrict)
+  createdBy  User           @relation("TaskCreatedBy", fields: [createdById], references: [id])
+  assignees  TaskAssignee[]
+  labels     TaskLabel[]
+  comments   Comment[]
+  activities TaskActivity[]
+
+  @@unique([projectId, number])
+  /// Project-wide list sorted by rank, id tie-breaker (cursor pagination).
+  @@index([projectId, rank, id])
+  /// Board column: tasks of one status, sorted by rank (cursor pagination per column).
+  @@index([statusId, rank, id])
+  /// Filter/summary by status within a project.
+  @@index([projectId, statusId])
+  /// Due-date range filters and overdue scans.
+  @@index([projectId, dueDate])
+  /// "My overdue tasks across projects" after joining assignees.
+  @@index([dueDate])
+  @@map("tasks")
+}
+
+model TaskAssignee {
+  taskId     String   @db.Uuid
+  userId     String   @db.Uuid
+  assignedAt DateTime @default(now())
+  task       Task     @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, userId])
+  /// "Tasks assigned to me" and assignee filter.
+  @@index([userId, taskId])
+  @@map("task_assignees")
+}
+
+model Label {
+  id        String      @id @default(uuid()) @db.Uuid
+  projectId String      @db.Uuid
+  name      String
+  color     String      @default("#7600FD")
+  project   Project     @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  tasks     TaskLabel[]
+
+  @@unique([projectId, name])
+  @@map("labels")
+}
+
+model TaskLabel {
+  taskId  String @db.Uuid
+  labelId String @db.Uuid
+  task    Task   @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  label   Label  @relation(fields: [labelId], references: [id], onDelete: Cascade)
+
+  @@id([taskId, labelId])
+  @@index([labelId])
+  @@map("task_labels")
+}
+
+model Comment {
+  id        String    @id @default(uuid()) @db.Uuid
+  taskId    String    @db.Uuid
+  authorId  String    @db.Uuid
+  /// Replies are one level deep: a reply's parent must have parentId = null (checked in code).
+  parentId  String?   @db.Uuid
+  body      String
+  createdAt DateTime  @default(now())
+  editedAt  DateTime?
+  deletedAt DateTime?
+
+  task    Task      @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  author  User      @relation(fields: [authorId], references: [id])
+  parent  Comment?  @relation("CommentReplies", fields: [parentId], references: [id], onDelete: Cascade)
+  replies Comment[] @relation("CommentReplies")
+
+  @@index([taskId, createdAt])
+  @@index([parentId, createdAt])
+  @@map("comments")
+}
+
+enum ActivityType {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  ASSIGNEE_ADDED
+  ASSIGNEE_REMOVED
+  LABEL_ADDED
+  LABEL_REMOVED
+  COMMENTED
+  DELETED
+}
+
+/// Append-only. Written in the same transaction as the change it records.
+model TaskActivity {
+  id        String       @id @default(uuid()) @db.Uuid
+  taskId    String       @db.Uuid
+  actorId   String       @db.Uuid
+  type      ActivityType
+  /// Field name for UPDATED (e.g. "title", "priority", "dueDate").
+  field     String?
+  fromValue Json?
+  toValue   Json?
+  createdAt DateTime     @default(now())
+
+  task  Task @relation(fields: [taskId], references: [id], onDelete: Cascade)
+  actor User @relation(fields: [actorId], references: [id])
+
+  @@index([taskId, createdAt])
+  @@map("task_activities")
+}

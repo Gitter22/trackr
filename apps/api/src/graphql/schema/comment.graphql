@@ -1,0 +1,46 @@
+type Comment {
+  id: ID!
+  body: String!
+  author: User!
+  createdAt: DateTime!
+  editedAt: DateTime
+  """Null for top-level comments."""
+  parentId: ID
+  """Always empty on replies (one level only)."""
+  replies: [Comment!]!
+}
+
+enum ActivityType {
+  CREATED
+  UPDATED
+  STATUS_CHANGED
+  ASSIGNEE_ADDED
+  ASSIGNEE_REMOVED
+  LABEL_ADDED
+  LABEL_REMOVED
+  COMMENTED
+  DELETED
+}
+
+type TaskActivity {
+  id: ID!
+  type: ActivityType!
+  actor: User!
+  field: String
+  fromValue: JSON
+  toValue: JSON
+  createdAt: DateTime!
+}
+
+input AddCommentInput {
+  taskId: ID!
+  body: String!
+  """Set to reply; must be a top-level comment."""
+  parentId: ID
+}
+
+extend type Mutation {
+  addComment(input: AddCommentInput!): Comment!
+  editComment(id: ID!, body: String!): Comment!
+  deleteComment(id: ID!): Boolean!
+}

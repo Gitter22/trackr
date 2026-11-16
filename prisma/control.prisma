@@ -1,0 +1,69 @@
+// Control plane: global metadata only. No tenant domain data lives here.
+// DB: control_panel_db
+
+generator client {
+  provider = "prisma-client-js"
+  output   = "../apps/api/src/generated/control"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("CONTROL_DATABASE_URL")
+}
+
+model SuperAdmin {
+  id           String   @id @default(uuid()) @db.Uuid
+  email        String   @unique
+  name         String
+  passwordHash String
+  createdAt    DateTime @default(now())
+
+  @@map("super_admins")
+}
+
+/// People created by the super admin who can own organizations.
+/// Their login lives in each tenant DB (seeded at provisioning), not here.
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  name      String
+  email     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  organizations Organization[]
+
+  @@map("users")
+}
+
+enum OrganizationStatus {
+  PROVISIONING
+  ACTIVE
+  INACTIVE
+  FAILED
+}
+
+model Organization {
+  id             String             @id @default(uuid()) @db.Uuid
+  title          String
+  /// Lowercase, [a-z0-9-], 3-32 chars, not reserved (admin, www, api...). Used as subdomain.
+  slug           String             @unique
+  /// tenant_<slug_with_underscores>_db
+  dbName         String             @unique
+  /// Per-tenant Postgres role that owns only this database.
+  dbUser         String             @unique
+  /// AES-256-GCM encrypted password for dbUser (key from TENANT_DB_SECRET_KEY).
+  dbPasswordEnc  String
+  status         OrganizationStatus @default(PROVISIONING)
+  provisionError String?
+  ownerId        String             @db.Uuid
+  owner          User               @relation(fields: [ownerId], references: [id], onDelete: Restrict)
+  projectLimit   Int                @default(10)
+  /// IANA timezone, e.g. "Asia/Kolkata". Used for overdue calculation.
+  timezone       String             @default("UTC")
+  createdAt      DateTime           @default(now())
+  updatedAt      DateTime           @updatedAt
+
+  @@index([ownerId])
+  @@index([status])
+  @@map("organizations")
+}

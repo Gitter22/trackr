@@ -1,0 +1,133 @@
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+type Task {
+  id: ID!
+  """e.g. KIK-12"""
+  key: String!
+  number: Int!
+  title: String!
+  description: String
+  priority: Priority!
+  status: TaskStatus!
+  rank: Float!
+  dueDate: Date
+  """Derived: dueDate before today (org timezone) and status not COMPLETED/CANCELLED."""
+  isOverdue: Boolean!
+  completedAt: DateTime
+  createdAt: DateTime!
+  updatedAt: DateTime!
+  createdBy: User!
+  project: Project!
+  assignees: [User!]!
+  labels: [Label!]!
+  commentCount: Int!
+  """Top-level comments, oldest first; each carries its replies."""
+  comments: [Comment!]!
+  """Newest first."""
+  activity: [TaskActivity!]!
+}
+
+type TaskEdge {
+  cursor: String!
+  node: Task!
+}
+
+type TaskConnection {
+  edges: [TaskEdge!]!
+  pageInfo: PageInfo!
+  """Total matching the filter (not just this page)."""
+  totalCount: Int!
+}
+
+input DateRange {
+  from: Date
+  to: Date
+}
+
+input TaskFilter {
+  statusIds: [ID!]
+  assigneeIds: [ID!]
+  priorities: [Priority!]
+  labelIds: [ID!]
+  due: DateRange
+  overdue: Boolean
+  """Matches title or key."""
+  search: String
+}
+
+input CreateTaskInput {
+  projectId: ID!
+  title: String!
+  description: String
+  priority: Priority = MEDIUM
+  """Defaults to the first status (lowest position)."""
+  statusId: ID
+  dueDate: Date
+  assigneeIds: [ID!]
+  labelIds: [ID!]
+}
+
+input UpdateTaskInput {
+  title: String
+  description: String
+  priority: Priority
+  dueDate: Date
+  assigneeIds: [ID!]
+  labelIds: [ID!]
+}
+
+"""Drag and drop: new column and the neighbours the task lands between."""
+input MoveTaskInput {
+  id: ID!
+  statusId: ID!
+  """Task directly above after the drop (null = top of column)."""
+  afterTaskId: ID
+  """Task directly below after the drop (null = bottom of column)."""
+  beforeTaskId: ID
+}
+
+type StatusCount {
+  status: TaskStatus!
+  count: Int!
+}
+
+type CategoryCount {
+  category: StatusCategory!
+  count: Int!
+}
+
+type AssigneeCount {
+  """Null bucket = unassigned."""
+  user: User
+  count: Int!
+  overdue: Int!
+}
+
+type ProjectSummary {
+  total: Int!
+  overdueCount: Int!
+  byStatus: [StatusCount!]!
+  byCategory: [CategoryCount!]!
+  byAssignee: [AssigneeCount!]!
+}
+
+extend type Query {
+  """Relay pagination ordered by (rank, id). Use filter.statusIds=[x] to page one board column."""
+  tasks(projectId: ID!, filter: TaskFilter, first: Int = 50, after: String): TaskConnection!
+  task(id: ID!): Task
+  """Counts honour the same filter as the board (minus statusIds)."""
+  projectSummary(projectId: ID!, filter: TaskFilter): ProjectSummary!
+  """Tasks assigned to the viewer across every project they can see."""
+  myTasks(filter: TaskFilter, first: Int = 50, after: String): TaskConnection!
+}
+
+extend type Mutation {
+  createTask(input: CreateTaskInput!): Task!
+  updateTask(id: ID!, input: UpdateTaskInput!): Task!
+  moveTask(input: MoveTaskInput!): Task!
+  deleteTask(id: ID!): Boolean!
+}

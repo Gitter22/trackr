@@ -1,0 +1,23 @@
+{
+  "name": "@trcker/api",
+  "private": true,
+  "version": "0.1.0",
+  "type": "commonjs",
+  "scripts": {
+    "validate:graphql": "tsx src/scripts/validate-graphql.ts",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "@graphql-tools/load-files": "8.0.9",
+    "@graphql-tools/merge": "10.0.9",
+    "@graphql-tools/schema": "11.0.9",
+    "graphql": "16.15.0"
+  },
+  "devDependencies": {
+    "@types/node": "^24.0.0",
+    "tsx": "^4.20.0",
+    "typescript": "5.9.3",
+    "vitest": "3.2.7"
+  }
+}
