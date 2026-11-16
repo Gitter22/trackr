@@ -3,62 +3,61 @@
 #   admin.${APP_DOMAIN}      -> control panel (SPA + /api/admin)
 #   <slug>.${APP_DOMAIN}     -> tenant app, only if the tenant is active
 #   anything else            -> 404
-# The client's X-Tenant-Slug is always overwritten here (proxy_set_header replaces it).
+# X-Tenant-Slug is always set here from the Host; a client-sent value never reaches the API.
 
 upstream api { server api:4000; }
 upstream web { server web:80; }
-
-proxy_http_version 1.1;
-proxy_set_header Host $host;
-proxy_set_header X-Real-IP $remote_addr;
-proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-proxy_set_header X-Proxy-Secret "${PROXY_SECRET}";
 
 # Root domain: marketing
 server {
   listen 80;
   server_name ${APP_DOMAIN};
-  location /api/ { proxy_set_header X-Tenant-Slug ""; proxy_pass http://api; }
-  location / { proxy_pass http://web; }
+  set $tenant_slug "";
+  location /api/ { include conf.d/proxy_headers.inc; proxy_pass http://api; }
+  location / { include conf.d/proxy_headers.inc; proxy_pass http://web; }
 }
 
 # Control panel
 server {
   listen 80;
   server_name admin.${APP_DOMAIN};
-  location /api/ { proxy_set_header X-Tenant-Slug ""; proxy_pass http://api; }
+  set $tenant_slug "";
+  location /api/ { include conf.d/proxy_headers.inc; proxy_pass http://api; }
   location /graphql { return 404; }
-  location / { proxy_pass http://web; }
+  location / { include conf.d/proxy_headers.inc; proxy_pass http://web; }
 }
 
 # Tenants
 server {
   listen 80;
   server_name ~^(?<tenant>[a-z0-9-]+)\.${APP_DOMAIN_RE}$;
+  set $tenant_slug $tenant;
 
   location = /_tenant_check {
     internal;
-    proxy_pass http://api/api/internal/tenant-check;
+    include conf.d/proxy_headers.inc;
     proxy_pass_request_body off;
     proxy_set_header Content-Length "";
-    proxy_set_header X-Tenant-Slug $tenant;
+    proxy_pass http://api/api/internal/tenant-check;
   }
 
-  location /api/ { proxy_set_header X-Tenant-Slug $tenant; proxy_pass http://api; }
-  location /graphql { proxy_set_header X-Tenant-Slug $tenant; proxy_pass http://api; }
+  location /api/ { include conf.d/proxy_headers.inc; proxy_pass http://api; }
+  location /graphql { include conf.d/proxy_headers.inc; proxy_pass http://api; }
 
   # Static assets are shared by every host, no tenant check needed.
-  location /assets/ { proxy_pass http://web; }
+  location /assets/ { include conf.d/proxy_headers.inc; proxy_pass http://web; }
 
   # Pages: only for active tenants. Unknown or inactive -> 404 page.
   location / {
     auth_request /_tenant_check;
     error_page 401 403 =404 @not_found;
+    include conf.d/proxy_headers.inc;
     proxy_pass http://web;
   }
 
   location @not_found {
     rewrite ^ /tenant-not-found.html break;
+    include conf.d/proxy_headers.inc;
     proxy_pass http://web;
   }
 }
