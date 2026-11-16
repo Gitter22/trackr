@@ -2,10 +2,10 @@ import request from 'supertest';
 import { createApp } from '../app';
 import { env } from '../config/env';
 
-const app = createApp();
+let defaultApp: ReturnType<typeof createApp> | undefined;
 
 /** supertest agent that looks like it came through the proxy for the given host. */
-export function api(host: string, tenantSlug = '') {
+export function api(host: string, tenantSlug = '', app = (defaultApp ??= createApp())) {
   const agent = request.agent(app);
   const withHeaders = <T extends request.Test>(t: T) =>
     t.set('Host', host).set('X-Proxy-Secret', env().PROXY_SECRET).set('X-Tenant-Slug', tenantSlug);
