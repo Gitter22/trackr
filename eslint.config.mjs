@@ -11,6 +11,7 @@ export default tseslint.config(
       '**/coverage',
       'apps/api/src/generated',
       'apps/web/src/api/generated',
+      '**/__generated__',
     ],
   },
   js.configs.recommended,

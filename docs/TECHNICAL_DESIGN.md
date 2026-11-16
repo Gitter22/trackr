@@ -61,6 +61,8 @@ The key decisions, and why:
 
 ## 2. Query patterns
 
+> SQL here uses snake_case column names to keep it easy to read. In Postgres, table names are snake_case (`tasks`, `task_assignees`), but column names match the Prisma fields and need quotes (`"statusId"`, `"deletedAt"`).
+
 Every GraphQL request runs against one tenant DB, so tenant IDs never appear in queries. Visibility is enforced by the resolvers. The owner sees every project. Everyone else sees only projects where they have a `ProjectMember` row.
 
 ### a) "My overdue tasks across projects"

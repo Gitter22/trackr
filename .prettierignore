@@ -5,3 +5,4 @@ package-lock.json
 apps/api/src/generated
 apps/web/src/api/generated
 prisma/migrations
+**/__generated__

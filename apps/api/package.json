@@ -12,7 +12,8 @@
     "validate:graphql": "tsx src/scripts/validate-graphql.ts",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "test:watch": "vitest"
+    "test:watch": "vitest",
+    "codegen": "graphql-codegen --config codegen.ts"
   },
   "dependencies": {
     "@graphql-tools/load-files": "8.0.9",
@@ -33,6 +34,9 @@
     "zod": "4.6.7"
   },
   "devDependencies": {
+    "@graphql-codegen/cli": "8.0.0",
+    "@graphql-codegen/typescript": "7.0.1",
+    "@graphql-codegen/typescript-resolvers": "7.0.1",
     "@types/cookie-parser": "1.4.10",
     "@types/express": "5.0.6",
     "@types/jsonwebtoken": "9.0.10",

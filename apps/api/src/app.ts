@@ -14,6 +14,7 @@ import { adminUsersRouter } from './rest/admin/users.routes';
 import { tenantAuthRouter } from './rest/tenant/auth.routes';
 import { tenantUsersRouter } from './rest/tenant/users.routes';
 import { requireTenantUser } from './middleware/tenant-auth';
+import { createGraphQLHandler } from './graphql/yoga';
 import { lookupTenant } from './tenant/tenant-lookup';
 import { TenantClientPool } from './tenant/tenant-pool';
 
@@ -72,6 +73,10 @@ export function createApp(deps: AppDeps = {}): express.Express {
   tenant.use('/auth', tenantAuthRouter);
   tenant.use('/users', requireTenantUser, tenantUsersRouter);
   app.use('/api/tenant', tenant);
+
+  // GraphQL: same pipeline, every operation needs a signed-in tenant user.
+  const yoga = createGraphQLHandler();
+  app.use('/graphql', ...tenantPipeline, requireTenantUser, (req, res) => yoga.handle(req, res));
 
   app.use('/api', (_req, res) => {
     res.status(404).json({ error: { code: 'NOT_FOUND', message: 'Not found' } });

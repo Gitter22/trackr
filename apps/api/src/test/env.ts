@@ -17,5 +17,7 @@ export function testEnv(): Record<string, string> {
     CONTROL_DATABASE_URL: `${pg}/control_test_db`,
     TENANT_DATABASE_URL: `${pg}/tenant_test_template_db`,
     REDIS_URL: 'redis://localhost:6379/15',
+    // Tests fire hundreds of requests per tenant; the limiter has its own tests.
+    RATE_LIMIT_CAPACITY: '100000',
   };
 }
