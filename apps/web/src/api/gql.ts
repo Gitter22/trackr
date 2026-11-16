@@ -13,12 +13,12 @@ export function createGqlRequest(storage: TenantStorage, onUnauthorized: () => v
   const client = new GraphQLClient(`${window.location.origin}/graphql`, {
     requestMiddleware: (request) => {
       const token = storage.get(TOKEN_KEY);
-      return token
-        ? {
-            ...request,
-            headers: { ...(request.headers as Record<string, string>), Authorization: `Bearer ${token}` },
-          }
-        : request;
+      if (!token) return request;
+      // Copy via Headers: request.headers can be a Headers instance, which object spread would empty
+      // (dropping Content-Type and getting a 415 from the API).
+      const headers = new Headers(request.headers as HeadersInit);
+      headers.set('Authorization', `Bearer ${token}`);
+      return { ...request, headers };
     },
   });
   return async <TData, TVars extends object>(doc: TypedDocumentNode<TData, TVars>, vars?: TVars) => {

@@ -29,7 +29,7 @@ describe('App host routing', () => {
       data: { org: { slug: 'kik', title: 'Kiksasa', timezone: 'UTC' } },
     });
     renderWithQuery(<App hostname="kik.localhost" />);
-    expect(await screen.findByRole('heading', { name: 'Kiksasa' })).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Sign in to Kiksasa' })).toBeInTheDocument();
   });
 
   it('shows 404 for an unknown tenant', async () => {
