@@ -15,7 +15,7 @@ const posInt = (def: number) => z.coerce.number().int().positive().default(def);
 
 export const envSchema = z.object({
   NODE_ENV: z.enum(['development', 'test', 'production']).default('development'),
-  APP_DOMAIN: z.string().min(1).default('trcker.localhost'),
+  APP_DOMAIN: z.string().min(1).default('localhost'),
   API_PORT: posInt(4000),
   PROXY_SECRET: z.string().min(8),
 

@@ -3,6 +3,7 @@ import { afterAll, beforeAll, describe, expect, it } from 'vitest';
 import { createApp } from '../../app';
 import { seedSuperAdmin } from '../../control/seed';
 import { controlPrisma, disconnectControlPrisma } from '../../lib/control-prisma';
+import { env } from '../../config/env';
 import { adminHost, api } from '../../test/http';
 
 beforeAll(async () => {
@@ -22,7 +23,7 @@ describe('admin auth', () => {
   });
 
   it('admin API is not served on a tenant host', async () => {
-    const res = await api('kiksasa.trcker.localhost', 'kiksasa').post('/api/admin/auth/login').send({});
+    const res = await api(`kiksasa.${env().APP_DOMAIN}`, 'kiksasa').post('/api/admin/auth/login').send({});
     expect(res.status).toBe(404);
   });
 

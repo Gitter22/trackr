@@ -7,7 +7,7 @@ import react from '@vitejs/plugin-react';
 // the Host header (overwriting anything the browser sent) and adds the proxy secret.
 const rootEnv = path.resolve(__dirname, '../../.env.local');
 if (fs.existsSync(rootEnv)) process.loadEnvFile(rootEnv);
-const APP_DOMAIN = process.env.APP_DOMAIN ?? 'trcker.localhost';
+const APP_DOMAIN = process.env.APP_DOMAIN ?? 'localhost';
 const API = `http://localhost:${process.env.API_PORT ?? 4000}`;
 
 export function slugFromHost(host: string | undefined, domain: string): string {
