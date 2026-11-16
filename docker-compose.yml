@@ -63,6 +63,8 @@ services:
     build:
       context: .
       dockerfile: docker/web.Dockerfile
+      args:
+        APP_DOMAIN: ${APP_DOMAIN}
     expose:
       - '80'
 

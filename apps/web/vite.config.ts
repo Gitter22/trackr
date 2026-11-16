@@ -2,6 +2,7 @@ import path from 'node:path';
 import fs from 'node:fs';
 import { defineConfig, type ProxyOptions } from 'vite';
 import react from '@vitejs/plugin-react';
+import tailwindcss from '@tailwindcss/vite';
 
 // Without Docker, this proxy plays Nginx's role: it derives X-Tenant-Slug from
 // the Host header (overwriting anything the browser sent) and adds the proxy secret.
@@ -29,7 +30,8 @@ const proxy: ProxyOptions = {
 };
 
 export default defineConfig({
-  plugins: [react()],
+  plugins: [react(), tailwindcss()],
+  define: { 'import.meta.env.VITE_APP_DOMAIN': JSON.stringify(APP_DOMAIN) },
   resolve: { alias: { '@': path.resolve(__dirname, 'src') } },
   server: {
     port: 5173,

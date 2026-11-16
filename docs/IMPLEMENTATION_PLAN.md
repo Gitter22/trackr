@@ -19,7 +19,7 @@
   - [x] D6 Tenant REST auth and users
   - [x] D7 GraphQL Yoga, loaders, projects and statuses
   - [x] D8 Tasks, move, pagination, comments, activity, summary
-  - [ ] D9 Web foundations
+  - [x] D9 Web foundations
   - [ ] D10 Marketing, admin panel, 404
   - [ ] D11 Tenant app: users, projects, statuses
   - [ ] D12 Kanban board, filters, chart, task drawer
