@@ -13,7 +13,7 @@
 - [ ] **Phase D** — Build (D1–D14)
   - [x] D1 Monorepo tooling: workspaces, eslint/prettier, husky + lint-staged, Zod env config
   - [x] D2 Docker compose, Nginx, Postgres, Redis
-  - [ ] D3 Control plane auth and admin routes
+  - [x] D3 Control plane auth and admin routes
   - [ ] D4 Tenant provisioning
   - [ ] D5 Tenant middlewares (resolver, rate limit, Prisma pool, auth)
   - [ ] D6 Tenant REST auth and users
