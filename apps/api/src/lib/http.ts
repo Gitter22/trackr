@@ -25,6 +25,11 @@ export const errorHandler: ErrorRequestHandler = (err, _req, res, _next) => {
     res.status(err.status).json({ error: { code: err.code, message: err.message, details: err.details } });
     return;
   }
+  // Policy denial (ForbiddenError from policy.ts)
+  if (err instanceof Error && 'code' in err && err.code === 'FORBIDDEN') {
+    res.status(403).json({ error: { code: 'FORBIDDEN', message: err.message } });
+    return;
+  }
   // Prisma unique constraint
   if (err && typeof err === 'object' && 'code' in err && err.code === 'P2002') {
     res.status(409).json({ error: { code: 'CONFLICT', message: 'Already exists' } });

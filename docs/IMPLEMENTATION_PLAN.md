@@ -16,7 +16,7 @@
   - [x] D3 Control plane auth and admin routes
   - [x] D4 Tenant provisioning
   - [x] D5 Tenant middlewares (resolver, rate limit, Prisma pool, auth)
-  - [ ] D6 Tenant REST auth and users
+  - [x] D6 Tenant REST auth and users
   - [ ] D7 GraphQL Yoga, loaders, projects and statuses
   - [ ] D8 Tasks, move, pagination, comments, activity, summary
   - [ ] D9 Web foundations

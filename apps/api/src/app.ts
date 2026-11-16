@@ -12,6 +12,8 @@ import { adminAuthRouter } from './rest/admin/auth.routes';
 import { adminOrgsRouter } from './rest/admin/orgs.routes';
 import { adminUsersRouter } from './rest/admin/users.routes';
 import { tenantAuthRouter } from './rest/tenant/auth.routes';
+import { tenantUsersRouter } from './rest/tenant/users.routes';
+import { requireTenantUser } from './middleware/tenant-auth';
 import { lookupTenant } from './tenant/tenant-lookup';
 import { TenantClientPool } from './tenant/tenant-pool';
 
@@ -62,7 +64,13 @@ export function createApp(deps: AppDeps = {}): express.Express {
   ];
   const tenant = Router();
   tenant.use(...tenantPipeline);
+  // Public: lets the web app show the login page or a 404 for this subdomain.
+  tenant.get('/status', (req, res) => {
+    const t = req.tenant!;
+    res.json({ org: { slug: t.slug, title: t.title, timezone: t.timezone } });
+  });
   tenant.use('/auth', tenantAuthRouter);
+  tenant.use('/users', requireTenantUser, tenantUsersRouter);
   app.use('/api/tenant', tenant);
 
   app.use('/api', (_req, res) => {
