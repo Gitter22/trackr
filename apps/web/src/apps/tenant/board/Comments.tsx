@@ -62,6 +62,7 @@ function CommentForm({
 function CommentItem({
   c,
   taskId,
+  statusId,
   projectId,
   canWrite,
   canModerate,
@@ -69,6 +70,8 @@ function CommentItem({
 }: {
   c: Comment | Reply;
   taskId: string;
+  /** The task's column, so only that column refreshes (comment count on the card). */
+  statusId: string;
   projectId: string;
   canWrite: boolean;
   canModerate: boolean;
@@ -101,7 +104,10 @@ function CommentItem({
             busy={editComment.isPending}
             onCancel={() => setEditing(false)}
             onSubmit={(body) =>
-              editComment.mutate({ taskId, id: c.id, body }, { onSuccess: () => setEditing(false), onError })
+              editComment.mutate(
+                { taskId, statusId, id: c.id, body },
+                { onSuccess: () => setEditing(false), onError },
+              )
             }
           />
         ) : (
@@ -125,7 +131,7 @@ function CommentItem({
                 className="hover:text-destructive"
                 onClick={() =>
                   window.confirm('Delete this comment?') &&
-                  deleteComment.mutate({ taskId, id: c.id }, { onError })
+                  deleteComment.mutate({ taskId, statusId, id: c.id }, { onError })
                 }
               >
                 Delete
@@ -141,12 +147,14 @@ function CommentItem({
 /** Comment thread with one level of replies. */
 export function Comments({
   taskId,
+  statusId,
   projectId,
   comments,
   canWrite,
   canModerate,
 }: {
   taskId: string;
+  statusId: string;
   projectId: string;
   comments: Comment[];
   canWrite: boolean;
@@ -163,6 +171,7 @@ export function Comments({
           <CommentItem
             c={c}
             taskId={taskId}
+            statusId={statusId}
             projectId={projectId}
             canWrite={canWrite}
             canModerate={canModerate}
@@ -175,6 +184,7 @@ export function Comments({
                   key={r.id}
                   c={r}
                   taskId={taskId}
+                  statusId={statusId}
                   projectId={projectId}
                   canWrite={canWrite}
                   canModerate={canModerate}
@@ -188,7 +198,7 @@ export function Comments({
                   onCancel={() => setReplyTo(null)}
                   onSubmit={(body) =>
                     addComment.mutate(
-                      { taskId, body, parentId: c.id },
+                      { taskId, statusId, body, parentId: c.id },
                       { onSuccess: () => setReplyTo(null), onError },
                     )
                   }
@@ -204,7 +214,7 @@ export function Comments({
           placeholder="Write a comment"
           submitLabel="Comment"
           busy={addComment.isPending}
-          onSubmit={(body) => addComment.mutate({ taskId, body }, { onError })}
+          onSubmit={(body) => addComment.mutate({ taskId, statusId, body }, { onError })}
         />
       )}
     </div>

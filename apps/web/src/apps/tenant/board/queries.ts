@@ -210,6 +210,10 @@ const CreateLabel = graphql(`
 
 export const boardKeys = {
   all: (projectId: string) => ['board', projectId] as const,
+  /** Prefix keys for invalidation: every column, one column (all filters), every summary. */
+  columns: (projectId: string) => ['board', projectId, 'column'] as const,
+  columnAll: (projectId: string, statusId: string) => ['board', projectId, 'column', statusId] as const,
+  summaryAll: (projectId: string) => ['board', projectId, 'summary'] as const,
   column: (projectId: string, statusId: string, filter: TaskFilter) =>
     ['board', projectId, 'column', statusId, filter] as const,
   summary: (projectId: string, filter: TaskFilter) => ['board', projectId, 'summary', filter] as const,
@@ -252,44 +256,68 @@ export function useTask(id: string | null) {
   });
 }
 
-/** Task mutations. Each refreshes the board, the summary, the open task and project counts. */
+/**
+ * Task mutations. Each one refreshes only what it can change:
+ * - the column(s) the task was in or moved to (every filter variant of them),
+ * - the summary (only refetches if the Insights tab is open; otherwise just marked stale),
+ * - the open task, if any,
+ * - project task counts only when a task is created or deleted.
+ * Every mutation's variables say which column(s) it touched (statusId / fromStatusId).
+ */
 export function useTaskMutations(projectId: string) {
   const { gql } = useTenantSession();
   const qc = useQueryClient();
-  const refresh = (taskId?: string) => {
-    void qc.invalidateQueries({ queryKey: boardKeys.all(projectId) });
-    void qc.invalidateQueries({ queryKey: projectKeys.all });
+  const refresh = ({
+    statusIds,
+    taskId,
+    counts,
+  }: {
+    statusIds: (string | null | undefined)[];
+    taskId?: string;
+    counts?: boolean;
+  }) => {
+    const columns = [...new Set(statusIds.filter(Boolean))] as string[];
+    // Unknown column (e.g. create without a statusId): refresh them all.
+    if (columns.length === 0) void qc.invalidateQueries({ queryKey: boardKeys.columns(projectId) });
+    for (const statusId of columns)
+      void qc.invalidateQueries({ queryKey: boardKeys.columnAll(projectId, statusId) });
+    void qc.invalidateQueries({ queryKey: boardKeys.summaryAll(projectId) });
     if (taskId) void qc.invalidateQueries({ queryKey: boardKeys.task(taskId) });
+    if (counts) void qc.invalidateQueries({ queryKey: projectKeys.lists });
   };
   return {
     create: useMutation({
       mutationFn: (input: CreateTaskInput) => gql(CreateTask, { input }),
-      onSettled: () => refresh(),
+      onSettled: (_d, _e, v) => refresh({ statusIds: [v.statusId as string | undefined], counts: true }),
     }),
     update: useMutation({
-      mutationFn: (v: { id: string; input: UpdateTaskInput }) => gql(UpdateTask, v),
-      onSettled: (_d, _e, v) => refresh(v.id),
+      mutationFn: (v: { id: string; statusId: string; input: UpdateTaskInput }) =>
+        gql(UpdateTask, { id: v.id, input: v.input }),
+      onSettled: (_d, _e, v) => refresh({ statusIds: [v.statusId], taskId: v.id }),
     }),
     move: useMutation({
-      mutationFn: (input: MoveTaskInput) => gql(MoveTask, { input }),
-      onSettled: (_d, _e, v) => refresh(String(v.id)),
+      mutationFn: ({ fromStatusId: _from, ...input }: MoveTaskInput & { fromStatusId: string }) =>
+        gql(MoveTask, { input }),
+      onSettled: (_d, _e, v) =>
+        refresh({ statusIds: [v.fromStatusId, String(v.statusId)], taskId: String(v.id) }),
     }),
     remove: useMutation({
-      mutationFn: (id: string) => gql(DeleteTask, { id }),
-      onSettled: () => refresh(),
+      mutationFn: (v: { id: string; statusId: string }) => gql(DeleteTask, { id: v.id }),
+      onSettled: (_d, _e, v) => refresh({ statusIds: [v.statusId], counts: true }),
     }),
     addComment: useMutation({
-      mutationFn: (v: { taskId: string; body: string; parentId?: string }) => gql(AddComment, { input: v }),
-      onSettled: (_d, _e, v) => refresh(v.taskId),
+      mutationFn: (v: { taskId: string; statusId: string; body: string; parentId?: string }) =>
+        gql(AddComment, { input: { taskId: v.taskId, body: v.body, parentId: v.parentId } }),
+      onSettled: (_d, _e, v) => refresh({ statusIds: [v.statusId], taskId: v.taskId }),
     }),
     editComment: useMutation({
-      mutationFn: (v: { taskId: string; id: string; body: string }) =>
+      mutationFn: (v: { taskId: string; statusId: string; id: string; body: string }) =>
         gql(EditComment, { id: v.id, body: v.body }),
-      onSettled: (_d, _e, v) => refresh(v.taskId),
+      onSettled: (_d, _e, v) => refresh({ statusIds: [v.statusId], taskId: v.taskId }),
     }),
     deleteComment: useMutation({
-      mutationFn: (v: { taskId: string; id: string }) => gql(DeleteComment, { id: v.id }),
-      onSettled: (_d, _e, v) => refresh(v.taskId),
+      mutationFn: (v: { taskId: string; statusId: string; id: string }) => gql(DeleteComment, { id: v.id }),
+      onSettled: (_d, _e, v) => refresh({ statusIds: [v.statusId], taskId: v.taskId }),
     }),
     createLabel: useMutation({
       mutationFn: (v: { name: string; color?: string }) => gql(CreateLabel, { input: { projectId, ...v } }),

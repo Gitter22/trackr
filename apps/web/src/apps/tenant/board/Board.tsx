@@ -94,6 +94,7 @@ export function Board({ projectId, statuses, filter, canCreate, canMove, onOpen 
       {
         id: card.id,
         statusId: toStatus,
+        fromStatusId: fromStatus,
         afterTaskId: plan.afterTaskId,
         beforeTaskId: plan.afterTaskId ? null : plan.beforeTaskId,
       },

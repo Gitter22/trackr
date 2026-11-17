@@ -137,6 +137,8 @@ const DeleteStatus = graphql(`
 
 export const projectKeys = {
   all: ['projects'] as const,
+  /** Prefix for both project lists (with and without archived). */
+  lists: ['projects', 'list'] as const,
   list: (includeArchived: boolean) => ['projects', 'list', includeArchived] as const,
   detail: (id: string) => ['projects', 'detail', id] as const,
 };

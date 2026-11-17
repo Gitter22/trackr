@@ -138,7 +138,7 @@ export function TaskDrawer({
   const onError = (err: unknown) => toast.error(errorMessage(err));
   const t = task.data;
   const update = (input: Parameters<typeof m.update.mutate>[0]['input']) =>
-    t && m.update.mutate({ id: t.id, input }, { onError });
+    t && m.update.mutate({ id: t.id, statusId: t.status.id, input }, { onError });
   const toggle = (list: string[], id: string) =>
     list.includes(id) ? list.filter((x) => x !== id) : [...list, id];
   // Assignable people: project members (the owner can also be assigned).
@@ -187,7 +187,12 @@ export function TaskDrawer({
                   aria-label="Status"
                   value={t.status.id}
                   disabled={!canEdit}
-                  onChange={(e) => m.move.mutate({ id: t.id, statusId: e.target.value }, { onError })}
+                  onChange={(e) =>
+                    m.move.mutate(
+                      { id: t.id, statusId: e.target.value, fromStatusId: t.status.id },
+                      { onError },
+                    )
+                  }
                 >
                   {project.statuses.map((s) => (
                     <option key={s.id} value={s.id}>
@@ -319,6 +324,7 @@ export function TaskDrawer({
               {tab === 'comments' ? (
                 <Comments
                   taskId={t.id}
+                  statusId={t.status.id}
                   projectId={project.id}
                   comments={t.comments}
                   canWrite={writable && can.comment}
@@ -349,10 +355,13 @@ export function TaskDrawer({
                 className="justify-self-start text-destructive"
                 onClick={() =>
                   window.confirm(`Delete ${t.key}? It is kept in history and can be restored later.`) &&
-                  m.remove.mutate(t.id, {
-                    onSuccess: () => (toast.success(`${t.key} deleted`), onClose()),
-                    onError,
-                  })
+                  m.remove.mutate(
+                    { id: t.id, statusId: t.status.id },
+                    {
+                      onSuccess: () => (toast.success(`${t.key} deleted`), onClose()),
+                      onError,
+                    },
+                  )
                 }
               >
                 <Trash2 /> Delete task

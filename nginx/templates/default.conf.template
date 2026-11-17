@@ -46,6 +46,7 @@ server {
 
   # Static assets are shared by every host, no tenant check needed.
   location /assets/ { include conf.d/proxy_headers.inc; proxy_pass http://web; }
+  location = /favicon.svg { include conf.d/proxy_headers.inc; proxy_pass http://web; }
 
   # Pages: only for active tenants. Unknown or inactive -> 404 page.
   location / {
