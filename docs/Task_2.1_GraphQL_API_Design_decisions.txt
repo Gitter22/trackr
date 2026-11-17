@@ -1,0 +1,18 @@
+Design of the GraphQL API behind the Kanban board:
+
+1. The board doesn’t load the whole project at once. 
+Each column calls tasks(projectId, filter: { statusIds: [id] }, first, after), 
+which returns a Relay-style connection. The cursor is an opaque rank:id pair, 
+and pages are ordered by (rank, id). That ordering matches the (statusId, rank, id) index exactly, 
+so Postgres reads rows already in order and stops after one page. 
+Page 50 costs the same as page 1, and inserts never shift pages around
+
+2. Moves. moveTask takes the target status and the cards the dropped card landed between, not a rank. 
+The server reads those neighbours from the database, works out the midpoint rank.
+The client never decides the order, so stale screens and concurrent drags can’t corrupt it.
+
+3. Every relation (assignees, labels, comment counts, authors) goes through DataLoaders created per request.
+
+4. Evey change write its history in the same transaction.
+
+5. Each mutation runs authorizeProject against one central policy

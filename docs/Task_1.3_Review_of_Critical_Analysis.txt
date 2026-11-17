@@ -1,0 +1,41 @@
+Review:
+The AI critique captured very good points across all categories especially on the scalability front.
+Here's my assesment on each points grouped by section:
+
+(1) N+1 query risks in GraphQL Resolvers:
+Most of the points raised by the critique is addressed by the implementation in subsequent steps 
+with no further prompt suggesting those were important but trivial to fix issues. The only points
+that remain open is batching the fetch of all columns in one query instead of fetching per column.
+This is a deliberate decision for simplicity and more so, because each column is also its own
+scroll based paginated list which would introduce more complexity.
+
+(2) Data consistency challenges
+Again, the points raised are very good and most of them are addressed especially clearing the Redis
+key when an organization is marked inactive. Practically, the org settings "live as a copy" in tenant DB 
+is a critical issue which must be addressed before going to production.
+
+(3) Scalability at 100x
+This is the section where AI critique is most helpful.
+The Database per tenant, Rate Limiter and Postgress Connection manager
+already provide a good foundation for scalability. However at even larger scales,
+these controls alone may not be fully sufficient.
+Other most notable observations that fixes problems at scale:
+- Use of pgBouncer to not overwhelm the Postgres server
+- Spreading tenants across several Postgres servers
+- Sticky routing a tenant to the same API instance for warmed Prisma Client cache
+
+Paginating comments and task activity history are low-hanging fruits which can be addressed
+at this scale as well.
+
+Using a text index on Title is also worth implementing at this scale.
+
+(4) Security Concerns:
+The core architecture of database-per-tenant already addresses
+most of the security concerns. Using default passwords with no provision to change them
+is a deliberate choice for this demo which can be addressed with a simple change password on
+first login flow.
+
+(5) Indexes and Denormalization:
+AI critique finds valuable points. Parial index on Tasks List
+is very valuable for long running projects with large number of tasks.
+GIN on tasks.title is a low and easy one that can be addressed first.

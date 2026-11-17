@@ -1,0 +1,24 @@
+State management and component structure for the Task Board:
+
+(A) State Management:
+1. The URL holds the board’s view. Filters and the open task live in the URL (?q=&assignee=&task=). 
+Reloads and shared links keep the same view, and the browser’s back button works.
+
+2. Each column owns a  useIinfiniteQuery whose cache key includes the status and the filter.
+
+3. Switching back to an earlier filter is instant from the cache using stale time config of @tanstack/react-query.
+
+4. Drag and Drop action use local mutation to update the UI in real time. The API call progresses in
+background and then refreshes the list once done.
+
+(B) Component Structure for Task Board:
+
+The Task Board UI uses component composition very well each with a clear boundary.
+BoardPage=>Board=>Column=>TaskCard | TaskDrawer
+BoardPage: URL state
+Board: drag and drop
+Column: data, paging and quick add
+TaskCard: draggable wrapper around a presentational CardBody
+TaskDrawer: its own query, so cards stay light
+
+permissionFor(role) helper function centralizes all permission checks.
