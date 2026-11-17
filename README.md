@@ -67,6 +67,18 @@ npm run dev
 - Vite's proxy plays Nginx's role: it sets `X-Tenant-Slug` from the Host and adds the proxy secret.
 - The URLs are the same as above.
 - Docker mode and dev mode both use port 5173, so run one at a time. `npm run docker:down` stops the Docker app containers, and `services:up` keeps the databases.
+- Both modes use the same Docker Postgres and Redis, so you see the same data.
+
+## Inspect the data (pgAdmin, Redis tools)
+
+Docker publishes Postgres on host port **5433** and Redis on **6380**. That leaves 5432 and 6379 free for a Postgres or Redis installed on your machine. Both ports come from `POSTGRES_PORT` and `REDIS_PORT` in `.env.local`.
+
+| Tool                     | Connect to       | Login                           | What you'll find                                                     |
+| ------------------------ | ---------------- | ------------------------------- | -------------------------------------------------------------------- |
+| pgAdmin / psql           | `localhost:5433` | `trcker` / `trcker` (superuser) | `control_panel_db`, plus one `tenant_<slug>_db` per organization     |
+| RedisInsight / redis-cli | `localhost:6380` | none                            | `tenant:<slug>` (60s tenant cache), `rl:<slug>` (rate limit buckets) |
+
+Tests use the same servers, but in separate databases: `control_test_db`, `tenant_t_*_db`, and Redis DB 15.
 
 ## How a request finds its tenant
 
